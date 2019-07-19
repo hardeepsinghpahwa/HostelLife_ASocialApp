@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">SQL Lite Project</string>
+    <string name="name">Name</string>
+    <string name="password">Password</string>
+    <string name="re_enter_password">Re-enter Password</string>
+    <string name="email">Email</string>
+    <string name="register">Register</string>
+    <string name="username">Username</string>
+    <string name="login">Login</string>
+    <string name="new_here_register">New Here? Register</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="feed">Feed</string>
+    <string name="profile">Profile</string>
+    <string name="add_profile_picture">Add Profile Picture</string>
+    <string name="_0_likes">0 likes</string>
+    <string name="_0_comments">0 comments</string>
+    <string name="male">MALE</string>
+    <string name="female">FEMALE</string>
+    <string name="other">OTHER</string>
+    <string name="your_posts">YOUR POSTS</string>
+    <string name="post">Post</string>
+    <string name="write_a_comment">Write a comment</string>
+</resources>

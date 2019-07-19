@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1095070323118",
+    "firebase_url": "https://sqlliteproject.firebaseio.com",
+    "project_id": "sqlliteproject",
+    "storage_bucket": "sqlliteproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095070323118:android:c73b47f8a15c94bb",
+        "android_client_info": {
+          "package_name": "com.example.sqlliteproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1095070323118-p8u27tbr1r2dt4ij9t2d7ltdboal4hde.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sqlliteproject",
+            "certificate_hash": "f7e685fa61edd8294e5a8d40b325bff817485cc3"
+          }
+        },
+        {
+          "client_id": "1095070323118-bhccor48f6tvlea4e9ri8mjhvue39qjj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd2Dy7AGHIMjE4gw21ExxJce2JLHGaYqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1095070323118-bhccor48f6tvlea4e9ri8mjhvue39qjj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
