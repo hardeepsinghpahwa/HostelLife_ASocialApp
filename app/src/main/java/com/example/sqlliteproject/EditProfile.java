@@ -113,6 +113,9 @@ public class EditProfile extends AppCompatActivity {
         pMonth = cal.get(Calendar.MONTH);
         pDay = cal.get(Calendar.DAY_OF_MONTH);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("Edit Profile");
         pDateSetListener =
                 new DatePickerDialog.OnDateSetListener() {
 
@@ -506,6 +509,15 @@ public class EditProfile extends AppCompatActivity {
         return null;
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
 }

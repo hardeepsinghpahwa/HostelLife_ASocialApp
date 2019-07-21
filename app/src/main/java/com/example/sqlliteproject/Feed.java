@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -63,13 +64,11 @@ public class Feed extends Fragment {
 
 
     ImageView add;
-    private static final String LIKE_URL = "https://172.20.8.98/phpmyadmin/login/like.php";
     private static final String URL = "https://172.20.8.98/phpmyadmin/login/showposts.php";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private final int RESULT_CROP = 400;
     String username;
-    static final String UR_L = "https://172.20.8.103/phpmyadmin/login/savepost.php";
 
     private String mParam1;
     private String mParam2;
@@ -77,6 +76,7 @@ public class Feed extends Fragment {
     RecyclerView recyclerView;
 
     String profilepic;
+    String json;
     public String userid;
 
     private OnFragmentInteractionListener mListener;
@@ -148,9 +148,20 @@ public class Feed extends Fragment {
 
 
         try {
-            JSONObject jsonObject = new JSONObject((getActivity().getIntent().getStringExtra("json")));
 
-            String name = jsonObject.getString("name");
+            if(getActivity().getIntent().getStringExtra("json")==null)
+            {
+                SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+
+                json=shared.getString("json","");
+
+            }
+            else {
+                json=getActivity().getIntent().getStringExtra("json");
+            }
+
+            JSONObject jsonObject = new JSONObject(json);
+
             username = jsonObject.getString("username");
             profilepic = jsonObject.getString("image");
             userid = jsonObject.getString("uid");
@@ -272,7 +283,7 @@ public class Feed extends Fragment {
 
             try {
 
-                JSONObject object = jsonArray.getJSONObject(i);
+                final JSONObject object = jsonArray.getJSONObject(i);
 
                 Log.i("posts", object.toString());
 
@@ -440,11 +451,31 @@ public class Feed extends Fragment {
                 requestQueue = Volley.newRequestQueue(context);
 
 
+
+
+
+
+
+
+
+
+
+
                 viewHolderClass.username.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        try {
+                            JSONObject object = jsonArray.getJSONObject(i);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         Intent intent=new Intent(getActivity(),ProfileDetails.class);
-                        intent.putExtra("userid",userid);
+                        try {
+                            intent.putExtra("loginuser",userid);
+                            intent.putExtra("userid",object.getString("userid"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         startActivity(intent);
                     }
                 });

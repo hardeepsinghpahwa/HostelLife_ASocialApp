@@ -1,7 +1,10 @@
 package com.example.sqlliteproject;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +41,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import dmax.dialog.SpotsDialog;
+
 import static com.example.sqlliteproject.Register.validate;
 
 public class LoginActivity extends AppCompatActivity {
@@ -53,6 +58,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        SharedPreferences shared = getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+
+        if(!shared.getString("json","").equals(""))
+        {
+            startActivity(new Intent(LoginActivity.this,Home.class));
+            finish();
+        }
 
         login=findViewById(R.id.loginbutton);
         email=findViewById(R.id.loginemail);
@@ -97,6 +110,14 @@ public class LoginActivity extends AppCompatActivity {
 
     void Login(final String email, final String password){
 
+        final AlertDialog alertDialog = new SpotsDialog.Builder()
+                .setContext(LoginActivity.this)
+                .setMessage("Logging you in")
+                .setCancelable(false)
+                .setTheme(R.style.Custom)
+                .build();
+        alertDialog.show();
+
         StringRequest stringRequest=new StringRequest(Request.Method.POST, URL_LOGIN, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -109,9 +130,16 @@ public class LoginActivity extends AppCompatActivity {
 
                     if(success.equals("1"))
                     {
+                        SharedPreferences shared = getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = shared.edit();
+                        editor.putString("email",email);
+                        editor.putString("json",jsonArray.getJSONObject(0).toString());
+                        editor.commit();
+                        alertDialog.dismiss();
                         Intent intent=new Intent(LoginActivity.this,Home.class);
                         intent.putExtra("json", (jsonArray.getJSONObject(0)).toString());
                         startActivity(intent);
+                        finish();
                         Log.i("success",success);
 
                         Log.i("one",(jsonArray.getJSONObject(0)).toString());

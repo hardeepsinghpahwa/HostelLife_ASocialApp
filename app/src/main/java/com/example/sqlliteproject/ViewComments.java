@@ -142,9 +142,6 @@ public class ViewComments extends AppCompatActivity {
                     jsonObject = new JSONObject(response);
                     JSONArray jsonArray = jsonObject.getJSONArray("comments");
 
-                    JSONObject o=jsonArray.getJSONObject(0);
-                    Log.i("comment",o.toString());
-
                     adapter =new CommentsAdapter(jsonArray,ViewComments.this);
                     comments.setAdapter(adapter);
 

@@ -18,8 +18,7 @@
             android:name=".ViewComments"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
-            android:name=".NewPost"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:name=".NewPost" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />

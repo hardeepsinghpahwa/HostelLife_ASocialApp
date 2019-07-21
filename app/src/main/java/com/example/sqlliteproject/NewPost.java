@@ -1,5 +1,6 @@
 package com.example.sqlliteproject;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import dmax.dialog.SpotsDialog;
+
 public class NewPost extends AppCompatActivity {
 
     ImageView pickimg;
@@ -54,6 +57,9 @@ public class NewPost extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_post);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("New Post");
         pickimg = findViewById(R.id.img);
         post = findViewById(R.id.post);
         posttext = findViewById(R.id.postt);
@@ -77,17 +83,20 @@ public class NewPost extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (uri != null && posttext.getText().toString() != null) {
-                    final ProgressDialog p = new ProgressDialog(NewPost.this);
-                    p.setMessage("Uploading");
-                    p.setTitle("Please Wait");
-                    p.show();
+                    final AlertDialog alertDialog = new SpotsDialog.Builder()
+                            .setContext(NewPost.this)
+                            .setMessage("Uploading")
+                            .setCancelable(false)
+                            .setTheme(R.style.Custom)
+                            .build();
+                    alertDialog.show();
                     storageReference = storageReference.child("Saved Images/" + UUID.randomUUID().toString() + ".jpg");
                     UploadTask uploadTask = storageReference.putFile(resultUri);
                     Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
                         public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                             if (!task.isSuccessful()) {
-                                p.dismiss();
+                                alertDialog.dismiss();
                                 throw task.getException();
                             }
 
@@ -126,7 +135,7 @@ public class NewPost extends AppCompatActivity {
                                 };
                                 requestqueue= Volley.newRequestQueue(getApplicationContext());
                                 requestqueue.add(stringRequest);
-                                p.dismiss();
+                                alertDialog.dismiss();
                                 Log.i("link",downloadlink);
                                 Toast.makeText(NewPost.this, "Posted", Toast.LENGTH_SHORT).show();
                                 finish();
@@ -134,6 +143,9 @@ public class NewPost extends AppCompatActivity {
                             }
                         }
                     });
+                }
+                else {
+                    Toast.makeText(NewPost.this, "Image cant be empty", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -158,4 +170,15 @@ public class NewPost extends AppCompatActivity {
 
                 }
             }
-        }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+}

@@ -1,7 +1,10 @@
 package com.example.sqlliteproject;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,9 +15,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -48,14 +53,16 @@ public class Profile extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    TextView username,desc,email,phn,name,gender,birthday,noposts;
+    TextView username, desc, email, phn, name, gender, birthday, noposts;
     CircleImageView propic;
     ImageView edit;
     LinearLayout me;
-    String uid;
+    String uid, json;
+    Button logout;
+    SharedPreferences shared;
     RecyclerView posts;
     RequestQueue requestQueue;
-    private static final String PROFILE_URL="https://172.20.8.98/phpmyadmin/login/profile.php";
+    private static final String PROFILE_URL = "https://172.20.8.98/phpmyadmin/login/profile.php";
     private static final String GETPOSTSURL = "https://172.20.8.98/phpmyadmin/login/getpostsprofilewise.php";
 
     private OnFragmentInteractionListener mListener;
@@ -96,54 +103,92 @@ public class Profile extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v= inflater.inflate(R.layout.fragment_profile, container, false);
+        View v = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        username=v.findViewById(R.id.user_name);
-        email=v.findViewById(R.id.emailtext);
-        name=v.findViewById(R.id.nametext);
-        phn=v.findViewById(R.id.phone);
-        desc=v.findViewById(R.id.description);
-        propic=v.findViewById(R.id.ppic);
-        edit=v.findViewById(R.id.editprofile);
-        gender=v.findViewById(R.id.gender);
-        birthday=v.findViewById(R.id.birthday);
-        noposts=v.findViewById(R.id.nopostsyet);
-        posts=v.findViewById(R.id.profileposts);
+        username = v.findViewById(R.id.user_name);
+        email = v.findViewById(R.id.emailtext);
+        name = v.findViewById(R.id.nametext);
+        phn = v.findViewById(R.id.phone);
+        desc = v.findViewById(R.id.description);
+        propic = v.findViewById(R.id.ppic);
+        edit = v.findViewById(R.id.editprofile);
+        gender = v.findViewById(R.id.gender);
+        birthday = v.findViewById(R.id.birthday);
+        noposts = v.findViewById(R.id.nopostsyet);
+        posts = v.findViewById(R.id.profileposts);
+        logout = v.findViewById(R.id.logout);
+
+
+        shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor editor = shared.edit();
+                        editor.clear();
+                        editor.commit();
+                        Intent intent = new Intent(getActivity(), LoginActivity.class);
+                        startActivity(intent);
+                        getActivity().finish();
+                        Toast.makeText(getActivity(), "Logged Out Successfully", Toast.LENGTH_SHORT).show();
+                    }
+                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        builder.create().dismiss();
+                    }
+                }).setMessage("Are you sure to logout");
+
+                builder.create().show();
+
+            }
+        });
 
         try {
+            if (getActivity().getIntent().getStringExtra("json") == null) {
+                SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
 
-            JSONObject jsonObject=new JSONObject((getActivity().getIntent().getStringExtra("json")));
+                json = shared.getString("json", "");
 
-            uid=jsonObject.getString("uid");
+            } else {
+                json = getActivity().getIntent().getStringExtra("json");
+            }
 
 
-            StringRequest stringRequest=new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+            JSONObject jsonObject = new JSONObject(json);
+
+            uid = jsonObject.getString("uid");
+
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
-                        JSONObject jsonObject1=new JSONObject(response);
-                        JSONArray jsonArray=jsonObject1.getJSONArray("details");
-                        JSONObject jsonObject2=jsonArray.getJSONObject(0);
+                        JSONObject jsonObject1 = new JSONObject(response);
+                        JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                        JSONObject jsonObject2 = jsonArray.getJSONObject(0);
 
                         name.setText(jsonObject2.getString("name"));
                         username.setText(jsonObject2.getString("username"));
-                        if(jsonObject2.getString("email").equals(""))
-                        {
+                        if (jsonObject2.getString("email").equals("")) {
                             email.setVisibility(View.GONE);
                         }
                         email.setText(jsonObject2.getString("email"));
-                        if(jsonObject2.getString("phone").equals("0"))
-                        {
+                        if (jsonObject2.getString("phone").equals("0")) {
                             phn.setVisibility(View.GONE);
                         }
                         gender.setText(jsonObject2.getString("gender"));
-                        Date date1=new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
-                        SimpleDateFormat format=new SimpleDateFormat("dd MMMM yyyy");
-                        String d=format.format(date1);
+                        Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
+                        SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+                        String d = format.format(date1);
                         birthday.setText(d);
                         Picasso.get().load(jsonObject2.getString("image")).into(propic);
-                        if(jsonObject2.getString("description").equals(""))
-                        {
+                        if (jsonObject2.getString("description").equals("")) {
                             desc.setHint("Edit to add a description");
                             desc.setTextSize(15);
                         }
@@ -162,23 +207,22 @@ public class Profile extends Fragment {
                 public void onErrorResponse(VolleyError error) {
 
                 }
-            }){
+            }) {
                 @Override
                 protected Map<String, String> getParams() throws AuthFailureError {
 
-                    Map<String,String> params=new HashMap<>();
-                    params.put("userid",uid);
+                    Map<String, String> params = new HashMap<>();
+                    params.put("userid", uid);
 
                     return params;
                 }
             };
 
-            requestQueue= Volley.newRequestQueue(getActivity());
+            requestQueue = Volley.newRequestQueue(getActivity());
             requestQueue.add(stringRequest);
 
 
-
-            posts.setLayoutManager(new GridLayoutManager(getActivity(),4));
+            posts.setLayoutManager(new GridLayoutManager(getActivity(), 4));
 
 
             StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
@@ -190,8 +234,7 @@ public class Profile extends Fragment {
                         JSONObject jsonObject = new JSONObject(response);
                         JSONArray jsonArray = jsonObject.getJSONArray("posts");
 
-                        if(jsonArray.length()==0)
-                        {
+                        if (jsonArray.length() == 0) {
                             noposts.setVisibility(View.VISIBLE);
                         }
 
@@ -211,7 +254,7 @@ public class Profile extends Fragment {
 
                 }
             }
-            ){
+            ) {
                 @Override
                 protected Map<String, String> getParams() throws AuthFailureError {
 
@@ -224,12 +267,6 @@ public class Profile extends Fragment {
             requestQueue.add(stringRequest1);
 
 
-
-
-
-
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -237,8 +274,8 @@ public class Profile extends Fragment {
         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i=new Intent(getActivity(),EditProfile.class);
-                i.putExtra("uid",uid);
+                Intent i = new Intent(getActivity(), EditProfile.class);
+                i.putExtra("uid", uid);
                 startActivity(i);
             }
         });
@@ -286,8 +323,7 @@ public class Profile extends Fragment {
     }
 
 
-    class PostAdapter1 extends RecyclerView.Adapter<PostAdapter1.PostViewHolder1>
-    {
+    class PostAdapter1 extends RecyclerView.Adapter<PostAdapter1.PostViewHolder1> {
 
         JSONArray jsonArray;
         String uid;
@@ -302,7 +338,7 @@ public class Profile extends Fragment {
         @NonNull
         @Override
         public PostAdapter1.PostViewHolder1 onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            View v= LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.profilepost,null);
+            View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.profilepost, null);
             return new PostAdapter1.PostViewHolder1(v);
 
         }
@@ -311,7 +347,7 @@ public class Profile extends Fragment {
         public void onBindViewHolder(@NonNull PostAdapter1.PostViewHolder1 postViewHolder, int i) {
 
             try {
-                JSONObject jsonObject=jsonArray.getJSONObject(i);
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
                 Picasso.get().load(jsonObject.getString("image")).into(postViewHolder.postimage);
 
             } catch (JSONException e) {
@@ -325,16 +361,17 @@ public class Profile extends Fragment {
             return jsonArray.length();
         }
 
-        public class PostViewHolder1 extends RecyclerView.ViewHolder
-        {
+        public class PostViewHolder1 extends RecyclerView.ViewHolder {
             ImageView postimage;
+
             public PostViewHolder1(@NonNull View itemView) {
                 super(itemView);
 
-                postimage=itemView.findViewById(R.id.postimg);
+                postimage = itemView.findViewById(R.id.postimg);
 
             }
         }
     }
+
 
 }
