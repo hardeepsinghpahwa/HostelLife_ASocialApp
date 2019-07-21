@@ -75,16 +75,14 @@ public class Register extends AppCompatActivity {
     StorageReference storageReference;
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-    private TextView pDisplayDate;
     private EditText pPickDate;
     private int pYear;
     private int pMonth;
     static final int DATE_DIALOG_ID = 0;
     private int pDay;
-    RadioButton male,female,other;
     RadioGroup gender;
 
-    public static String URL_Reg = "https://192.168.43.157/phpmyadmin/login/users.php";
+    public static String URL_Reg = "https://192.168.43.98/phpmyadmin/login/users.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -377,7 +375,7 @@ public class Register extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PICK_IMAGE) {
+        if (requestCode == PICK_IMAGE && data!=null) {
             uri = data.getData();
 
             CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON).setAspectRatio(200, 200).start(this);

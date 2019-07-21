@@ -63,13 +63,13 @@ public class Feed extends Fragment {
 
 
     ImageView add;
-    private static final String LIKE_URL = "https://172.20.8.47/phpmyadmin/login/like.php";
-    private static final String URL = "https://172.20.8.47/phpmyadmin/login/showposts.php";
+    private static final String LIKE_URL = "https://172.20.8.98/phpmyadmin/login/like.php";
+    private static final String URL = "https://172.20.8.98/phpmyadmin/login/showposts.php";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private final int RESULT_CROP = 400;
     String username;
-    static final String UR_L = "https://172.20.8.47/phpmyadmin/login/savepost.php";
+    static final String UR_L = "https://172.20.8.103/phpmyadmin/login/savepost.php";
 
     private String mParam1;
     private String mParam2;
@@ -102,6 +102,7 @@ public class Feed extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+
     private void performCrop(String picUri) {
         try {
             //Start Crop Activity
@@ -190,31 +191,19 @@ public class Feed extends Fragment {
         requestQueue.add(stringRequest);
 
 
-
-
-
-
-
-
-
-
-
-
-
         add = v.findViewById(R.id.addpost);
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent i = new Intent(getActivity(), NewPost.class);
-                i.putExtra("username", username);
+                i.putExtra("userid", userid);
                 i.putExtra("pp", profilepic);
                 startActivity(i);
 
 
             }
         });
-
 
 
         return v;
@@ -239,7 +228,6 @@ public class Feed extends Fragment {
     }
 
 
-
     @Override
     public void onDetach() {
         super.onDetach();
@@ -251,42 +239,6 @@ public class Feed extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    class FetchData extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
-                        JSONArray jsonArray = response.getJSONArray("posts");
-
-                        for (int p = 0; p < jsonArray.length(); p++) {
-                            JSONObject object = jsonArray.getJSONObject(p);
-
-
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            });
-
-            RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            requestQueue.add(jsonObjectRequest);
-
-            return null;
-        }
-
-    }
-
     class AdapterClass extends RecyclerView.Adapter<AdapterClass.ViewHolderClass> {
         JSONArray jsonArray;
         String uid;
@@ -295,9 +247,11 @@ public class Feed extends Fragment {
         String pid;
 
 
-        private static final String LIKE_URL = "https://172.20.8.47/phpmyadmin/login/like.php";
-        private static final String CHECK_URL = "https://172.20.8.47/phpmyadmin/login/checklike.php";
-        private static final String COMMENT_URL = "https://172.20.8.47/phpmyadmin/login/comment.php";
+        private static final String LIKE_URL = "https://172.20.8.98/phpmyadmin/login/like.php";
+        private static final String CHECK_URL = "https://172.20.8.98/phpmyadmin/login/checklike.php";
+        private static final String COMMENT_URL = "https://172.20.8.98/phpmyadmin/login/comment.php";
+        private static final String PROFILE_URL = "https://172.20.8.98/phpmyadmin/login/profile.php";
+
 
         AdapterClass(JSONArray array, String u, Context c) {
             jsonArray = array;
@@ -322,16 +276,49 @@ public class Feed extends Fragment {
 
                 Log.i("posts", object.toString());
 
-                String uname = object.getString("username");
                 String time = object.getString("date");
                 String img = object.getString("image");
                 String desc = object.getString("description");
                 String loc = object.getString("location");
                 String likes = object.getString("likes");
                 String comments = object.getString("comments");
-                final String postid = object.getString("uid");
+                final String userid1 = object.getString("userid");
                 String num = String.valueOf(object.getInt("number"));
-                String pic = String.valueOf(object.getString("profilepic"));
+
+                StringRequest stringRequest2 = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject1 = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                            JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+
+                            viewHolderClass.username.setText(jsonObject2.getString("username"));
+
+                            Picasso.get().load(jsonObject2.getString("image")).into(viewHolderClass.propic);
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+
+                        Map<String, String> params = new HashMap<>();
+                        params.put("userid", userid1);
+
+                        return params;
+                    }
+                };
+                requestQueue = Volley.newRequestQueue(context);
+                requestQueue.add(stringRequest2);
 
 
                 String dateStart = time;
@@ -360,17 +347,23 @@ public class Feed extends Fragment {
                         viewHolderClass.time.setText(diffDays + " days");
                     } else if (diffDays == 1) {
                         viewHolderClass.time.setText(diffDays + " day");
-                    } else if (diffHours != 0) {
+                    } else if (diffHours > 1) {
                         viewHolderClass.time.setText(diffHours + " hours ago");
-                    } else if (diffMinutes != 0) {
+                    } else if (diffHours == 1) {
+                        viewHolderClass.time.setText(diffHours + " hour ago");
+                    } else if (diffMinutes > 1) {
                         viewHolderClass.time.setText(diffMinutes + " minutes ago");
-                    } else {
+                    } else if (diffMinutes == 1) {
+                        viewHolderClass.time.setText(diffMinutes + " minute ago");
+                    } else if (diffSeconds > 1) {
                         viewHolderClass.time.setText(diffSeconds + " seconds ago");
+                    } else if (diffDays == 1) {
+                        viewHolderClass.time.setText(diffSeconds + " second ago");
                     }
+
 
                     Log.i("u", desc);
 
-                    viewHolderClass.username.setText(uname);
                     if (desc.equals("")) {
                         viewHolderClass.description.setVisibility(View.GONE);
                     }
@@ -390,7 +383,6 @@ public class Feed extends Fragment {
                         viewHolderClass.comments.setText(comments + " comment");
                     }
 
-                    Picasso.get().load(pic).into(viewHolderClass.propic);
                     Picasso.get().load(img).into(viewHolderClass.postpic);
 
                     try {
@@ -437,7 +429,6 @@ public class Feed extends Fragment {
                             return params;
                         }
                     };
-                    requestQueue = Volley.newRequestQueue(context);
                     requestQueue.add(stringRequest1);
 
 
@@ -447,6 +438,20 @@ public class Feed extends Fragment {
 
 
                 requestQueue = Volley.newRequestQueue(context);
+
+
+                viewHolderClass.username.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent=new Intent(getActivity(),ProfileDetails.class);
+                        intent.putExtra("userid",userid);
+                        startActivity(intent);
+                    }
+                });
+
+
+
+
 
 
                 viewHolderClass.postcomment.setOnClickListener(new View.OnClickListener() {
@@ -471,20 +476,19 @@ public class Feed extends Fragment {
                                     String commentz = jsonObject1.getString("comments");
                                     String success = jsonObject1.getString("success");
 
-                                    if(success.equals("1"))
-                                    {
+                                    if (success.equals("1")) {
                                         Toast.makeText(getActivity(), "Comment Posted", Toast.LENGTH_SHORT).show();
                                         viewHolderClass.postcomment.setText("Posted");
                                         Timer t = new Timer();
 //Set the schedule function and rate
                                         t.schedule(new TimerTask() {
 
-                                                                  @Override
-                                                                  public void run() {
-                                                                      viewHolderClass.postcomment.setText("Post");
-                                                                  }
+                                                       @Override
+                                                       public void run() {
+                                                           viewHolderClass.postcomment.setText("Post");
+                                                       }
 
-                                                              },
+                                                   },
 //Set how long before to start calling the TimerTask (in milliseconds)
                                                 0,
 //Set the amount of time between each execution (in milliseconds)
@@ -550,10 +554,18 @@ public class Feed extends Fragment {
                 });
 
 
+
+
+
+
+
+
+
+
+
                 viewHolderClass.like.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         try {
                             JSONObject object = jsonArray.getJSONObject(i);
                             pid = object.getString("uid");
@@ -570,48 +582,90 @@ public class Feed extends Fragment {
                                     final String success = jsonObject.getString("success");
 
                                     if (success.equals("1")) {
-                                        viewHolderClass.like.setImageResource(R.drawable.like_white);
-                                    } else if (success.equals("0")) {
-                                        viewHolderClass.like.setImageResource(R.drawable.green_like);
-                                    }
-                                    StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
-                                        @Override
-                                        public void onResponse(String response) {
-                                            JSONObject jsonObject1 = null;
-                                            try {
-                                                jsonObject1 = new JSONObject(response);
-                                                String likes = jsonObject1.getString("likes");
-                                                if ((Integer.parseInt(likes) > 1)) {
-                                                    viewHolderClass.likes.setText(likes + " likes");
-                                                } else {
-                                                    viewHolderClass.likes.setText(likes + " like");
+                                       viewHolderClass.like.setImageResource(R.drawable.like_white);
+                                        StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                JSONObject jsonObject1 = null;
+                                                try {
+                                                    jsonObject1 = new JSONObject(response);
+                                                    String likes = jsonObject1.getString("likes");
+                                                    if ((Integer.parseInt(likes) > 1)) {
+                                                        viewHolderClass.likes.setText(likes + " likes");
+                                                    } else {
+                                                        viewHolderClass.likes.setText(likes + " like");
+                                                    }
+
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
                                                 }
 
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
+
+                                            }
+                                        }, new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+
+                                            }
+                                        }) {
+                                            @Override
+                                            protected Map<String, String> getParams() throws AuthFailureError {
+
+                                                Map<String, String> params = new HashMap<>();
+                                                params.put("success", success);
+                                                params.put("user_id", uid);
+                                                params.put("post_id", pid);
+
+                                                return params;
                                             }
 
+                                        };
+                                        requestQueue.add(stringRequest);
 
-                                        }
-                                    }, new Response.ErrorListener() {
-                                        @Override
-                                        public void onErrorResponse(VolleyError error) {
+                                    } else if (success.equals("0")) {
+                                         viewHolderClass.like.setImageResource(R.drawable.green_like);
+                                        StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                JSONObject jsonObject1 = null;
+                                                try {
+                                                    jsonObject1 = new JSONObject(response);
+                                                    String likes = jsonObject1.getString("likes");
+                                                    if ((Integer.parseInt(likes) > 1)) {
+                                                        viewHolderClass.likes.setText(likes + " likes");
+                                                    } else {
+                                                        viewHolderClass.likes.setText(likes + " like");
+                                                    }
 
-                                        }
-                                    }) {
-                                        @Override
-                                        protected Map<String, String> getParams() throws AuthFailureError {
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
 
-                                            Map<String, String> params = new HashMap<>();
-                                            params.put("success", success);
-                                            params.put("user_id", uid);
-                                            params.put("post_id", pid);
 
-                                            return params;
-                                        }
-                                    };
+                                            }
+                                        }, new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
 
-                                    requestQueue.add(stringRequest);
+                                            }
+                                        }) {
+                                            @Override
+                                            protected Map<String, String> getParams() throws AuthFailureError {
+
+                                                Map<String, String> params = new HashMap<>();
+                                                params.put("success", success);
+                                                params.put("user_id", uid);
+                                                params.put("post_id", pid);
+
+                                                return params;
+                                            }
+
+                                        };
+                                        requestQueue.add(stringRequest);
+
+                                    }
+
+
 
                                     Log.i("su", success);
                                 } catch (JSONException e) {
@@ -638,7 +692,6 @@ public class Feed extends Fragment {
                         };
                         requestQueue.add(stringRequest1);
 
-
                     }
                 });
 
@@ -646,7 +699,7 @@ public class Feed extends Fragment {
                 viewHolderClass.comment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        viewHolderClass.comment.requestFocus();
                     }
                 });
 

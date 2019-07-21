@@ -43,11 +43,11 @@ public class NewPost extends AppCompatActivity {
     Button post;
     Uri uri,resultUri;
     RequestQueue requestqueue;
-    String downloadlink,username,pp;
+    String downloadlink,userid,pp;
     StorageReference storageReference;
     private static int PICK_IMAGE = 1;
     EditText posttext, location;
-    private static final String URL="https://172.20.8.47/phpmyadmin/login/savepost.php";
+    private static final String URL="https://172.20.8.98/phpmyadmin/login/savepost.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class NewPost extends AppCompatActivity {
         posttext = findViewById(R.id.postt);
         location = findViewById(R.id.location);
 
-        username=getIntent().getStringExtra("username");
+        userid=getIntent().getStringExtra("userid");
         pp=getIntent().getStringExtra("pp");
 
         storageReference = FirebaseStorage.getInstance().getReference();
@@ -117,10 +117,9 @@ public class NewPost extends AppCompatActivity {
                                         Map<String,String> params=new HashMap<>();
                                         params.put("image",downloadlink);
                                         params.put("uid",u);
-                                        params.put("username",username);
+                                        params.put("userid",userid);
                                         params.put("description",posttext.getText().toString());
                                         params.put("location",location.getText().toString());
-                                        params.put("profilepic",pp);
 
                                         return params;
                                     }
@@ -142,7 +141,7 @@ public class NewPost extends AppCompatActivity {
     }
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (requestCode == PICK_IMAGE) {
+                if (requestCode == PICK_IMAGE && data!=null) {
                     uri = data.getData();
 
                         CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON).setAspectRatio(200, 200).start(this);

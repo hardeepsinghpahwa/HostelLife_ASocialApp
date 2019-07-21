@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     Button login;
     EditText email,password;
     TextView register;
-    public static String URL_LOGIN="https://172.20.8.47/phpmyadmin/login/login.php";
+    public static String URL_LOGIN="https://172.20.8.98/phpmyadmin/login/login.php";
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     @Override

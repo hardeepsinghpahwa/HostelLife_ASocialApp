@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -44,12 +48,15 @@ public class Profile extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    TextView username,desc,email,phn,name,gender,birthday;
+    TextView username,desc,email,phn,name,gender,birthday,noposts;
     CircleImageView propic;
     ImageView edit;
+    LinearLayout me;
     String uid;
+    RecyclerView posts;
     RequestQueue requestQueue;
-    private static final String PROFILE_URL="https://172.20.8.47/phpmyadmin/login/profile.php";
+    private static final String PROFILE_URL="https://172.20.8.98/phpmyadmin/login/profile.php";
+    private static final String GETPOSTSURL = "https://172.20.8.98/phpmyadmin/login/getpostsprofilewise.php";
 
     private OnFragmentInteractionListener mListener;
 
@@ -100,6 +107,8 @@ public class Profile extends Fragment {
         edit=v.findViewById(R.id.editprofile);
         gender=v.findViewById(R.id.gender);
         birthday=v.findViewById(R.id.birthday);
+        noposts=v.findViewById(R.id.nopostsyet);
+        posts=v.findViewById(R.id.profileposts);
 
         try {
 
@@ -169,6 +178,58 @@ public class Profile extends Fragment {
 
 
 
+            posts.setLayoutManager(new GridLayoutManager(getActivity(),4));
+
+
+            StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        Log.i("res", response);
+
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONArray jsonArray = jsonObject.getJSONArray("posts");
+
+                        if(jsonArray.length()==0)
+                        {
+                            noposts.setVisibility(View.VISIBLE);
+                        }
+
+                        posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.i("success", e.toString());
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i("success", error.toString());
+
+                }
+            }
+            ){
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+
+                    Map<String, String> params = new HashMap<>();
+                    params.put("userid", uid);
+
+                    return params;
+                }
+            };
+            requestQueue.add(stringRequest1);
+
+
+
+
+
+
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -223,4 +284,57 @@ public class Profile extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+
+    class PostAdapter1 extends RecyclerView.Adapter<PostAdapter1.PostViewHolder1>
+    {
+
+        JSONArray jsonArray;
+        String uid;
+        Context context;
+
+        public PostAdapter1(JSONArray jsonArray, String uid, Context context) {
+            this.jsonArray = jsonArray;
+            this.uid = uid;
+            this.context = context;
+        }
+
+        @NonNull
+        @Override
+        public PostAdapter1.PostViewHolder1 onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+            View v= LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.profilepost,null);
+            return new PostAdapter1.PostViewHolder1(v);
+
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull PostAdapter1.PostViewHolder1 postViewHolder, int i) {
+
+            try {
+                JSONObject jsonObject=jsonArray.getJSONObject(i);
+                Picasso.get().load(jsonObject.getString("image")).into(postViewHolder.postimage);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return jsonArray.length();
+        }
+
+        public class PostViewHolder1 extends RecyclerView.ViewHolder
+        {
+            ImageView postimage;
+            public PostViewHolder1(@NonNull View itemView) {
+                super(itemView);
+
+                postimage=itemView.findViewById(R.id.postimg);
+
+            }
+        }
+    }
+
 }

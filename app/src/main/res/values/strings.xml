@@ -22,4 +22,8 @@
     <string name="your_posts">YOUR POSTS</string>
     <string name="post">Post</string>
     <string name="write_a_comment">Write a comment</string>
+    <string name="save">Save</string>
+    <string name="no_posts_yet">No Posts Yet</string>
+    <string name="posts">POSTS</string>
+    <string name="about">ABOUT</string>
 </resources>

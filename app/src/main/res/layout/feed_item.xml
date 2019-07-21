@@ -65,11 +65,12 @@
             android:layout_weight="1">
 
             <ImageButton
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
                 android:layout_height="match_parent"
                 android:id="@+id/like"
                 android:layout_marginStart="10dp"
-                android:src="@drawable/like_white" />
+                android:src="@drawable/like_white"
+                android:background="#FFFFFF" />
 
 
             <TextView
@@ -90,10 +91,11 @@
             android:layout_weight="1">
 
             <ImageButton
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
                 android:layout_height="match_parent"
                 android:id="@+id/comment"
                 android:layout_marginStart="10dp"
+                android:background="#FFFFFF"
                 android:src="@drawable/commentwhite" />
 
 

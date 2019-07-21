@@ -25,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -46,8 +48,8 @@ public class ViewComments extends AppCompatActivity {
     Button comment;
     RequestQueue requestQueue;
     CommentsAdapter adapter;
-    private static final String COMMENTS_URL="https://172.20.8.47/phpmyadmin/login/getcomments.php";
-    private static final String COMMENT_URL = "https://172.20.8.47/phpmyadmin/login/comment.php";
+    private static final String COMMENTS_URL="https://172.20.8.98/phpmyadmin/login/getcomments.php";
+    private static final String COMMENT_URL = "https://172.20.8.98/phpmyadmin/login/comment.php";
 
 
     @Override
@@ -55,6 +57,7 @@ public class ViewComments extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_comments);
 
+        requestQueue= Volley.newRequestQueue(ViewComments.this);
 
         comments=findViewById(R.id.commentsrecyclerview);
         comments.setLayoutManager(new LinearLayoutManager(ViewComments.this));
@@ -167,7 +170,6 @@ public class ViewComments extends AppCompatActivity {
             }
         };
 
-        requestQueue= Volley.newRequestQueue(ViewComments.this);
         requestQueue.add(stringRequest);
 
 
@@ -178,6 +180,8 @@ public class ViewComments extends AppCompatActivity {
 
         JSONArray array;
         Context context;
+        private static final String PROFILE_URL="https://172.20.8.103/phpmyadmin/login/profile.php";
+
 
         CommentsAdapter(JSONArray jsonArray,Context c)
         {
@@ -193,13 +197,53 @@ public class ViewComments extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull CommentsAdapter.CommentsViewHolder commentsViewHolder, int i) {
+        public void onBindViewHolder(@NonNull final CommentsAdapter.CommentsViewHolder commentsViewHolder, int i) {
 
             try {
-                JSONObject o= array.getJSONObject(i);
+                final JSONObject o= array.getJSONObject(i);
 
+                StringRequest stringRequest=new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONObject jsonObject1 = null;
+                        try {
+                            jsonObject1 = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                            JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+
+                            commentsViewHolder.username.setText(jsonObject2.getString("username"));
+                            Picasso.get().load(jsonObject2.getString("image")).into(commentsViewHolder.propic);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+
+                        Map<String, String> params = new HashMap<>();
+                        try {
+                            params.put("userid", o.getString("user_id"));
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        return params;
+                    }
+
+                    };
+                requestQueue.add(stringRequest);
                 commentsViewHolder.comment.setText(o.getString("comment"));
-                commentsViewHolder.username.setText(o.getString("user_id"));
+
+
 
 
 
