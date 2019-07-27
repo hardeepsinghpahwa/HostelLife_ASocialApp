@@ -1,6 +1,7 @@
 package com.example.sqlliteproject;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -60,6 +62,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import dmax.dialog.SpotsDialog;
+
 public class Register extends AppCompatActivity {
 
     private TextInputEditText name, pass, reenterpass, email, username;
@@ -71,6 +75,7 @@ public class Register extends AppCompatActivity {
     String downloadlink;
     Uri uri, resultUri;
     String gen;
+    AlertDialog alertDialog;
     DatePickerDialog.OnDateSetListener pDateSetListener;
     StorageReference storageReference;
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
@@ -82,12 +87,17 @@ public class Register extends AppCompatActivity {
     private int pDay;
     RadioGroup gender;
 
-    public static String URL_Reg = "https://192.168.43.98/phpmyadmin/login/users.php";
+    public static String URL_Reg = PhpScripts.URL_Reg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        ServiceManager serviceManager = new ServiceManager(getApplicationContext());
+        if (!serviceManager.isNetworkAvailable()) {
+            startActivity(new Intent(Register.this,NoInternet.class));
+        }
 
         name = findViewById(R.id.name);
         pass = findViewById(R.id.password);
@@ -197,8 +207,13 @@ public class Register extends AppCompatActivity {
                     reenterpass.requestFocus();
                 } else {
 
-                    progressBar.setVisibility(View.VISIBLE);
-
+                    alertDialog = new SpotsDialog.Builder()
+                            .setContext(Register.this)
+                            .setMessage("Processing")
+                            .setCancelable(false)
+                            .setTheme(R.style.Custom)
+                            .build();
+                    alertDialog.show();
                     if (resultUri != null) {
 
 
@@ -221,6 +236,10 @@ public class Register extends AppCompatActivity {
                                     Log.i("", task.getResult().toString());
                                     downloadlink = task.getResult().toString();
                                     new Reg().execute();
+                                }
+                                else {
+                                    Toast.makeText(Register.this, "Registration Failed", Toast.LENGTH_SHORT).show();
+                                    alertDialog.dismiss();
                                 }
                             }
                         });
@@ -308,14 +327,15 @@ public class Register extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            handleSSLHandshake();
 
             final String namet = name.getText().toString();
             final String password = pass.getText().toString();
             final String image = downloadlink;
             final String mail = email.getText().toString();
-            final String uname = username.getText().toString();
+            final String uname = username.getText().toString().toLowerCase();
             final String bdate= pPickDate.getText().toString();
+
+            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
 
             StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_Reg, new Response.Listener<String>() {
                 @Override
@@ -328,20 +348,29 @@ public class Register extends AppCompatActivity {
                         Log.i("success", success);
 
                         if (success.equals("1")) {
-                            progressBar.setVisibility(View.GONE);
 
+                            alertDialog.dismiss();
                             finish();
                             Toast.makeText(Register.this, "Registration Success", Toast.LENGTH_SHORT).show();
+                        }
+                        else if(success.equals("0"))
+                        {
+                            alertDialog.dismiss();
+                            Toast.makeText(Register.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        alertDialog.dismiss();
+                        Toast.makeText(Register.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                         Log.i("e", e.toString());
                     }
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    alertDialog.dismiss();
+                    Toast.makeText(Register.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                     Log.i("error", error.toString());
                 }
             }) {
@@ -364,8 +393,15 @@ public class Register extends AppCompatActivity {
                     return params;
                 }
             };
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    30000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+            int x=2;// retry count
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 48,
+                    x, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
             requestQueue.add(stringRequest);
 
 

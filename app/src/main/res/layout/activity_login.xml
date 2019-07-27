@@ -4,30 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#6FEE32"
+    android:background="@color/colorPrimary"
     android:padding="15dp"
+    android:focusable="true"
+    android:id="@+id/loginlayout"
+    android:focusableInTouchMode="true"
     tools:context=".LoginActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="WELCOME"
-        android:textSize="40sp"
-        android:textColor="#FFFFFF"
+    <ImageView
+        android:layout_width="190dp"
+        android:layout_height="150dp"
         android:layout_centerHorizontal="true"
-        android:textStyle="bold"
-        android:fontFamily="serif"
-        android:layout_marginTop="60sp"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/a"
         />
 
     <android.support.design.widget.TextInputEditText
         android:id="@+id/loginemail"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:layout_marginTop="180dp"
         android:background="@drawable/edittext"
         android:hint="@string/email"
         android:paddingStart="10dp"
+        android:inputType="textEmailAddress"
         android:paddingEnd="10dp"
         android:textColor="#000" />
 
@@ -35,25 +35,26 @@
     <android.support.design.widget.TextInputEditText
         android:id="@+id/loginpassword"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:layout_below="@+id/loginemail"
         android:layout_marginTop="30dp"
         android:background="@drawable/edittext"
         android:hint="@string/password"
         android:paddingStart="10dp"
+        android:inputType="textPassword"
         android:paddingEnd="10dp"
         android:textColor="#000" />
 
     <Button
         android:id="@+id/loginbutton"
         android:layout_width="170dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_below="@+id/loginpassword"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
         android:background="@drawable/button"
         android:text="@string/login"
-        android:textColor="#2BFF00"
+        android:textColor="#000"
         android:textSize="18sp" />
 
     <TextView

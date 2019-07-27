@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#6FEE32"
+    android:background="@color/colorPrimary"
     tools:context=".Register">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:padding="10dp">
 
         <ProgressBar
@@ -40,7 +42,7 @@
             android:scaleType="centerCrop"
             android:layout_centerHorizontal="true"
             android:src="@drawable/profile"
-            android:background="#6FEE32"
+            android:background="@color/colorPrimary"
             android:layout_height="80dp"
             android:layout_marginTop="80dp" />
 
@@ -62,6 +64,7 @@
             android:background="@drawable/edittext"
             android:hint="@string/name"
             android:layout_marginTop="40dp"
+            android:inputType="textPersonName"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:textColor="#000" />
@@ -76,6 +79,7 @@
             android:hint="@string/email"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
+            android:inputType="textEmailAddress"
             android:textColor="#000" />
 
         <android.support.design.widget.TextInputEditText
@@ -87,6 +91,7 @@
             android:background="@drawable/edittext"
             android:hint="@string/password"
             android:paddingStart="10dp"
+            android:inputType="textPassword"
             android:paddingEnd="10dp"
             android:textColor="#000" />
 
@@ -98,6 +103,7 @@
             android:layout_marginTop="20dp"
             android:background="@drawable/edittext"
             android:hint="@string/username"
+            android:inputType="text"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:textColor="#000" />
@@ -208,19 +214,21 @@
             android:background="@drawable/edittext"
             android:hint="@string/re_enter_password"
             android:paddingStart="10dp"
+            android:inputType="textPassword"
             android:paddingEnd="10dp"
             android:textColor="#000" />
 
         <Button
             android:id="@+id/register"
             android:layout_width="170dp"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             android:layout_below="@+id/reenterpassword"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="60dp"
             android:background="@drawable/button"
             android:text="@string/register"
-            android:textColor="#2BFF00"
+            android:layout_marginBottom="10dp"
+            android:textColor="#000"
             android:textSize="18sp" />
 
     </RelativeLayout>

@@ -14,7 +14,7 @@
         android:layout_alignParentBottom="true"
         app:menu="@menu/bottomnav"
         app:itemIconTint="#FFFFFF"
-        android:background="#5FE12F"
+        android:background="@color/colorPrimary"
         app:itemTextColor="#FFFFFF"
         android:id="@+id/bottomnavbar"
         >

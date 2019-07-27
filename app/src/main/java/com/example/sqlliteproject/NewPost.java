@@ -1,5 +1,6 @@
 package com.example.sqlliteproject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -10,17 +11,22 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -32,6 +38,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,24 +58,38 @@ public class NewPost extends AppCompatActivity {
     String downloadlink,userid,pp;
     StorageReference storageReference;
     private static int PICK_IMAGE = 1;
+    LinearLayout linearLayout;
     EditText posttext, location;
-    private static final String URL="https://172.20.8.98/phpmyadmin/login/savepost.php";
+    private static final String NEW_URL=PhpScripts.NEW_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_post);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("New Post");
         pickimg = findViewById(R.id.img);
         post = findViewById(R.id.post);
         posttext = findViewById(R.id.postt);
+        linearLayout=findViewById(R.id.newpostlayout);
         location = findViewById(R.id.location);
 
         userid=getIntent().getStringExtra("userid");
         pp=getIntent().getStringExtra("pp");
+        ServiceManager serviceManager = new ServiceManager(getApplicationContext());
+        if (!serviceManager.isNetworkAvailable()) {
+            startActivity(new Intent(NewPost.this,NoInternet.class));
+        }
+
+        linearLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+
+            }
+        });
+
 
         storageReference = FirebaseStorage.getInstance().getReference();
         pickimg.setOnClickListener(new View.OnClickListener() {
@@ -105,24 +128,47 @@ public class NewPost extends AppCompatActivity {
                         }
                     }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                         @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
+                        public void onComplete(@NonNull final Task<Uri> task) {
                             if (task.isSuccessful()) {
                                 downloadlink = task.getResult().toString();
-                                StringRequest stringRequest=new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+                                StringRequest stringRequest=new StringRequest(Request.Method.POST, NEW_URL, new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
+                                        JSONObject jsonObject= null;
+                                        try {
+                                            jsonObject = new JSONObject(response);
+                                            String success=jsonObject.getString("success");
+
+                                            if(success.equals("1"))
+                                            {
+                                                Toast.makeText(NewPost.this, "Posted", Toast.LENGTH_SHORT).show();
+                                                finish();
+                                            }
+                                            else{
+                                                Log.i("error","success=0");
+                                                Toast.makeText(NewPost.this, "Error Posting Image, success=0", Toast.LENGTH_SHORT).show();
+
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
 
                                     }
                                 }, new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-
+                                        Log.i("error",error.toString());
+                                        Toast.makeText(NewPost.this, "Error Posting Image", Toast.LENGTH_SHORT).show();
                                     }
                                 })
                                 {
                                     @Override
                                     protected Map<String, String> getParams() throws AuthFailureError {
                                         String u=UUID.randomUUID().toString();
+
+                                        Log.i("details",u+userid+posttext.getText().toString()+location.getText().toString());
+                                        Log.i("link",downloadlink);
+
                                         Map<String,String> params=new HashMap<>();
                                         params.put("image",downloadlink);
                                         params.put("uid",u);
@@ -133,12 +179,17 @@ public class NewPost extends AppCompatActivity {
                                         return params;
                                     }
                                 };
+
+                                stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                        30000,
+                                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+
                                 requestqueue= Volley.newRequestQueue(getApplicationContext());
                                 requestqueue.add(stringRequest);
                                 alertDialog.dismiss();
-                                Log.i("link",downloadlink);
-                                Toast.makeText(NewPost.this, "Posted", Toast.LENGTH_SHORT).show();
-                                finish();
+
 
                             }
                         }

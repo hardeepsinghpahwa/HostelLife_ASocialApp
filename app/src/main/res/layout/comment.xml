@@ -19,11 +19,11 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/commentpic"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:layout_gravity="top"
-            android:padding="10dp"
-            android:src="@drawable/whitecircle" />
+            android:layout_margin="10dp"
+            android:background="@drawable/whitecircle" />
 
         <LinearLayout
             android:layout_width="match_parent"

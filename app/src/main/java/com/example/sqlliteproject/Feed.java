@@ -1,3 +1,4 @@
+
 package com.example.sqlliteproject;
 
 import android.app.Activity;
@@ -13,20 +14,26 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -64,20 +71,24 @@ public class Feed extends Fragment {
 
 
     ImageView add;
-    private static final String URL = "https://172.20.8.98/phpmyadmin/login/showposts.php";
+    private static final String SHOW_URL = PhpScripts.SHOW_URL;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private final int RESULT_CROP = 400;
     String username;
+    boolean alreadyexecuted=false;
 
+    NestedScrollView scrollView;
     private String mParam1;
     private String mParam2;
 
     RecyclerView recyclerView;
 
     String profilepic;
+    TextView noposts;
     String json;
     public String userid;
+    ProgressBar progressBar;
 
     private OnFragmentInteractionListener mListener;
 
@@ -93,6 +104,7 @@ public class Feed extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -136,6 +148,11 @@ public class Feed extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        alreadyexecuted=false;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -143,9 +160,21 @@ public class Feed extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_feed, container, false);
 
+
         recyclerView = v.findViewById(R.id.postsrecyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        progressBar=v.findViewById(R.id.feedprogressbar);
+        scrollView=v.findViewById(R.id.scrollview);
+        noposts=v.findViewById(R.id.feednoposts);
+        scrollView.setSmoothScrollingEnabled(true);
+        scrollView.smoothScrollTo(6,6);
 
+        ServiceManager serviceManager = new ServiceManager(getActivity());
+        if (!serviceManager.isNetworkAvailable()) {
+            startActivity(new Intent(getActivity(),NoInternet.class));
+        }
+
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         try {
 
@@ -173,7 +202,7 @@ public class Feed extends Fragment {
             e.printStackTrace();
         }
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, SHOW_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -184,6 +213,11 @@ public class Feed extends Fragment {
 
                     recyclerView.setAdapter(new AdapterClass(jsonArray, userid, getActivity()));
 
+                    if(jsonArray.length()==0)
+                    {
+                        progressBar.setVisibility(View.GONE);
+                        noposts.setVisibility(View.VISIBLE);
+                    }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -198,6 +232,10 @@ public class Feed extends Fragment {
 
             }
         });
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
         requestQueue.add(stringRequest);
 
@@ -255,19 +293,30 @@ public class Feed extends Fragment {
         String uid;
         RequestQueue requestQueue;
         Context context;
-        String pid;
+        String pid,likepid;
+        int pos=0;
 
 
-        private static final String LIKE_URL = "https://172.20.8.98/phpmyadmin/login/like.php";
-        private static final String CHECK_URL = "https://172.20.8.98/phpmyadmin/login/checklike.php";
-        private static final String COMMENT_URL = "https://172.20.8.98/phpmyadmin/login/comment.php";
-        private static final String PROFILE_URL = "https://172.20.8.98/phpmyadmin/login/profile.php";
+        private static final String LIKE_URL = PhpScripts.LIKE_URL;
+        private static final String CHECK_URL = PhpScripts.CHECK_URL;
+        private static final String COMMENT_URL = PhpScripts.COMMENT_URL;
+        private static final String PROFILE_URL = PhpScripts.PROFILE_URL;
 
 
         AdapterClass(JSONArray array, String u, Context c) {
             jsonArray = array;
             uid = u;
             context = c;
+        }
+
+        @Override
+        public void onViewAttachedToWindow(@NonNull ViewHolderClass holder) {
+            super.onViewAttachedToWindow(holder);
+            progressBar.setVisibility(View.GONE);
+            if(!alreadyexecuted) {
+                recyclerView.smoothScrollToPosition(pos);
+                alreadyexecuted = true;
+            }
         }
 
         @NonNull
@@ -280,6 +329,7 @@ public class Feed extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull final AdapterClass.ViewHolderClass viewHolderClass, final int i) {
+
 
             try {
 
@@ -306,7 +356,7 @@ public class Feed extends Fragment {
 
                             viewHolderClass.username.setText(jsonObject2.getString("username"));
 
-                            Picasso.get().load(jsonObject2.getString("image")).into(viewHolderClass.propic);
+                            Picasso.get().load(jsonObject2.getString("image")).resize(200,200).into(viewHolderClass.propic);
 
 
                         } catch (JSONException e) {
@@ -328,6 +378,10 @@ public class Feed extends Fragment {
                         return params;
                     }
                 };
+                stringRequest2.setRetryPolicy(new DefaultRetryPolicy(
+                        30000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 requestQueue = Volley.newRequestQueue(context);
                 requestQueue.add(stringRequest2);
 
@@ -394,15 +448,9 @@ public class Feed extends Fragment {
                         viewHolderClass.comments.setText(comments + " comment");
                     }
 
-                    Picasso.get().load(img).into(viewHolderClass.postpic);
+                    Picasso.get().load(img).resize(500,500).into(viewHolderClass.postpic);
 
-                    try {
-                        JSONObject o = jsonArray.getJSONObject(i);
-                        pid = o.getString("uid");
-                        Log.i("pid", pid);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+
 
                     StringRequest stringRequest1 = new StringRequest(Request.Method.POST, CHECK_URL, new Response.Listener<String>() {
                         @Override
@@ -432,14 +480,27 @@ public class Feed extends Fragment {
                     }) {
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
+                            try {
+                                JSONObject o = jsonArray.getJSONObject(i);
+                                likepid = o.getString("uid");
+
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
                             Map<String, String> params = new HashMap<>();
-                            params.put("pid", pid);
+                            params.put("pid",likepid);
                             params.put("uid", uid);
 
 
                             return params;
                         }
                     };
+                    stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                            30000,
+                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                     requestQueue.add(stringRequest1);
 
 
@@ -508,22 +569,13 @@ public class Feed extends Fragment {
                                     String success = jsonObject1.getString("success");
 
                                     if (success.equals("1")) {
+                                        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                                        inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                                                InputMethodManager.HIDE_NOT_ALWAYS);
+
                                         Toast.makeText(getActivity(), "Comment Posted", Toast.LENGTH_SHORT).show();
-                                        viewHolderClass.postcomment.setText("Posted");
-                                        Timer t = new Timer();
-//Set the schedule function and rate
-                                        t.schedule(new TimerTask() {
-
-                                                       @Override
-                                                       public void run() {
-                                                           viewHolderClass.postcomment.setText("Post");
-                                                       }
-
-                                                   },
-//Set how long before to start calling the TimerTask (in milliseconds)
-                                                0,
-//Set the amount of time between each execution (in milliseconds)
-                                                1000);
+                                        viewHolderClass.postcomment.setText("Post");
                                     }
 
                                     if ((Integer.parseInt(commentz) > 1)) {
@@ -560,7 +612,10 @@ public class Feed extends Fragment {
                                 return params;
                             }
                         };
-
+                        request.setRetryPolicy(new DefaultRetryPolicy(
+                                30000,
+                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                         requestQueue.add(request);
                     }
                 });
@@ -577,9 +632,11 @@ public class Feed extends Fragment {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        pos=i;
                         in.putExtra("userid", uid);
                         in.putExtra("postid", pid);
                         context.startActivity(in);
+                        getActivity().overridePendingTransition(R.anim.slidein,R.anim.slideout);
 
                     }
                 });
@@ -597,6 +654,7 @@ public class Feed extends Fragment {
                 viewHolderClass.like.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        viewHolderClass.like.setClickable(false);
                         try {
                             JSONObject object = jsonArray.getJSONObject(i);
                             pid = object.getString("uid");
@@ -613,7 +671,7 @@ public class Feed extends Fragment {
                                     final String success = jsonObject.getString("success");
 
                                     if (success.equals("1")) {
-                                       viewHolderClass.like.setImageResource(R.drawable.like_white);
+                                        viewHolderClass.like.setImageResource(R.drawable.like_white);
                                         StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
@@ -623,8 +681,10 @@ public class Feed extends Fragment {
                                                     String likes = jsonObject1.getString("likes");
                                                     if ((Integer.parseInt(likes) > 1)) {
                                                         viewHolderClass.likes.setText(likes + " likes");
+                                                        viewHolderClass.like.setClickable(true);
                                                     } else {
                                                         viewHolderClass.likes.setText(likes + " like");
+                                                        viewHolderClass.like.setClickable(true);
                                                     }
 
                                                 } catch (JSONException e) {
@@ -650,11 +710,14 @@ public class Feed extends Fragment {
                                                 return params;
                                             }
 
-                                        };
+                                        };  stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                                30000,
+                                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                                         requestQueue.add(stringRequest);
 
                                     } else if (success.equals("0")) {
-                                         viewHolderClass.like.setImageResource(R.drawable.green_like);
+                                        viewHolderClass.like.setImageResource(R.drawable.green_like);
                                         StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
@@ -664,8 +727,10 @@ public class Feed extends Fragment {
                                                     String likes = jsonObject1.getString("likes");
                                                     if ((Integer.parseInt(likes) > 1)) {
                                                         viewHolderClass.likes.setText(likes + " likes");
+                                                        viewHolderClass.like.setClickable(true);
                                                     } else {
                                                         viewHolderClass.likes.setText(likes + " like");
+                                                        viewHolderClass.like.setClickable(true);
                                                     }
 
                                                 } catch (JSONException e) {
@@ -692,6 +757,10 @@ public class Feed extends Fragment {
                                             }
 
                                         };
+                                        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                                30000,
+                                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                                         requestQueue.add(stringRequest);
 
                                     }
@@ -720,7 +789,10 @@ public class Feed extends Fragment {
 
                                 return params;
                             }
-                        };
+                        };  stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                                30000,
+                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                         requestQueue.add(stringRequest1);
 
                     }

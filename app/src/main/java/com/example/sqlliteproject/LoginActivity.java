@@ -1,6 +1,7 @@
 package com.example.sqlliteproject;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,15 +11,21 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -45,13 +52,15 @@ import dmax.dialog.SpotsDialog;
 
 import static com.example.sqlliteproject.Register.validate;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity{
 
 
     Button login;
     EditText email,password;
     TextView register;
-    public static String URL_LOGIN="https://172.20.8.98/phpmyadmin/login/login.php";
+    AlertDialog alertDialog;
+    RelativeLayout relativeLayout;
+    public static String URL_LOGIN=PhpScripts.URL_LOGIN;
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     @Override
@@ -61,7 +70,11 @@ public class LoginActivity extends AppCompatActivity {
 
         SharedPreferences shared = getSharedPreferences("Mypref", Context.MODE_PRIVATE);
 
-        if(!shared.getString("json","").equals(""))
+        ServiceManager serviceManager = new ServiceManager(getApplicationContext());
+        if (!serviceManager.isNetworkAvailable()) {
+            startActivity(new Intent(LoginActivity.this,NoInternet.class));
+        }
+        else if(!shared.getString("json","").equals(""))
         {
             startActivity(new Intent(LoginActivity.this,Home.class));
             finish();
@@ -69,8 +82,19 @@ public class LoginActivity extends AppCompatActivity {
 
         login=findViewById(R.id.loginbutton);
         email=findViewById(R.id.loginemail);
+        relativeLayout=findViewById(R.id.loginlayout);
         password=findViewById(R.id.loginpassword);
         register=findViewById(R.id.reg);
+
+        relativeLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+
+            }
+        });
 
         email.setText("hardeepsingh3485.in@gmail.com");
         password.setText("hello1234");
@@ -110,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
 
     void Login(final String email, final String password){
 
-        final AlertDialog alertDialog = new SpotsDialog.Builder()
+         alertDialog = new SpotsDialog.Builder()
                 .setContext(LoginActivity.this)
                 .setMessage("Logging you in")
                 .setCancelable(false)
@@ -152,9 +176,15 @@ public class LoginActivity extends AppCompatActivity {
                             String em=object.getString("email");
                         }
                     }
+                    else if(success.equals("0")){
+                        alertDialog.dismiss();
+                        Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
+                    }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    alertDialog.dismiss();
+                    Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
                     Log.i("success",e.toString());
                 }
 
@@ -163,6 +193,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.i("success",error.toString());
+                alertDialog.dismiss();
+                Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
 
             }
         })
@@ -179,6 +211,10 @@ public class LoginActivity extends AppCompatActivity {
 
         };
 
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestQueue requestQueue= Volley.newRequestQueue(getApplicationContext());
         requestQueue.add(stringRequest);
 
@@ -247,6 +283,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }
 
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -270,6 +307,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
             };
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    30000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
             RequestQueue requestQueue= Volley.newRequestQueue(getApplicationContext());
             requestQueue.add(stringRequest);

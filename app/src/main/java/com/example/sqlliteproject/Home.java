@@ -1,5 +1,6 @@
 package com.example.sqlliteproject;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -24,10 +25,10 @@ public class Home extends AppCompatActivity implements Feed.OnFragmentInteractio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.layout,new Feed());
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        ServiceManager serviceManager = new ServiceManager(getApplicationContext());
+        if (!serviceManager.isNetworkAvailable()) {
+            startActivity(new Intent(Home.this,NoInternet.class));
+        }
 
         bottomNavigationView=findViewById(R.id.bottomnavbar);
 
@@ -65,13 +66,26 @@ public class Home extends AppCompatActivity implements Feed.OnFragmentInteractio
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Fragment fragment=new Feed();
+        FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.layout,fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             finish();
             return;
         }
-
-
 
         this.doubleBackToExitPressedOnce = true;
         Toast.makeText(this, "Please click back again to exit", Toast.LENGTH_SHORT).show();

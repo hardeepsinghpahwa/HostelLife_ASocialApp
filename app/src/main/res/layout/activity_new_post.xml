@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#6FEE32"
-    android:orientation="vertical"
     tools:context=".NewPost">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/newpostlayout"
+        android:layout_height="700dp"
+        android:background="@drawable/phoneback"
         android:orientation="vertical">
 
 
         <ImageView
-            android:layout_width="250dp"
-            android:layout_height="250dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:layout_gravity="center"
             android:id="@+id/img"
-            android:background="#6FEE32"
-            android:src="@drawable/addimg"
+            android:src="@drawable/gallery"
             android:layout_marginTop="15dp"
             />
 
@@ -30,18 +36,18 @@
             android:padding="10dp"
             android:hint="Write a Post"
             android:gravity="top"
-            android:background="#FFFFFF"
+            android:background="@drawable/edittextback"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="10dp"
             android:id="@+id/postt"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="60dp"
             />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="#FFFFFF"
+            android:background="@drawable/edittextback"
             android:layout_margin="20dp"
             android:padding="10dp"
             android:hint="Add  Location"
@@ -64,4 +70,6 @@
 
 
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

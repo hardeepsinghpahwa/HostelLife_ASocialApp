@@ -7,11 +7,32 @@
     app:cardUseCompatPadding="true"
     app:cardCornerRadius="10dp"
     app:cardElevation="10dp"
+    android:background="@color/colorPrimary"
     tools:context=".ViewComments">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"
+            android:id="@+id/commentspbar"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_comments"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:textSize="20sp"
+            android:visibility="gone"
+            android:id="@+id/nocomments"
+            android:textStyle="bold"
+            />
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
@@ -27,6 +48,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_alignParentBottom="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:orientation="horizontal"
         android:weightSum="5">
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,10 +19,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -42,6 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import dmax.dialog.SpotsDialog;
 
 public class Profile extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -57,13 +61,15 @@ public class Profile extends Fragment {
     CircleImageView propic;
     ImageView edit;
     LinearLayout me;
+    AlertDialog alertDialog;
     String uid, json;
     Button logout;
+    ProgressBar progressBar;
     SharedPreferences shared;
     RecyclerView posts;
     RequestQueue requestQueue;
-    private static final String PROFILE_URL = "https://172.20.8.98/phpmyadmin/login/profile.php";
-    private static final String GETPOSTSURL = "https://172.20.8.98/phpmyadmin/login/getpostsprofilewise.php";
+    private static final String PROFILE_URL = PhpScripts.PROFILE_URL;
+    private static final String GETPOSTSURL = PhpScripts.GETPOSTSURL;
 
     private OnFragmentInteractionListener mListener;
 
@@ -105,6 +111,11 @@ public class Profile extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
 
+        ServiceManager serviceManager = new ServiceManager(getActivity());
+        if (!serviceManager.isNetworkAvailable()) {
+            startActivity(new Intent(getActivity(), NoInternet.class));
+        }
+
         username = v.findViewById(R.id.user_name);
         email = v.findViewById(R.id.emailtext);
         name = v.findViewById(R.id.nametext);
@@ -117,6 +128,7 @@ public class Profile extends Fragment {
         noposts = v.findViewById(R.id.nopostsyet);
         posts = v.findViewById(R.id.profileposts);
         logout = v.findViewById(R.id.logout);
+        progressBar = v.findViewById(R.id.profileprogessbar);
 
 
         shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
@@ -129,13 +141,28 @@ public class Profile extends Fragment {
                 builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        alertDialog = new SpotsDialog.Builder()
+                                .setContext(getActivity())
+                                .setMessage("Logging out")
+                                .setCancelable(false)
+                                .setTheme(R.style.Custom)
+                                .build();
+                        alertDialog.show();
                         SharedPreferences.Editor editor = shared.edit();
                         editor.clear();
                         editor.commit();
-                        Intent intent = new Intent(getActivity(), LoginActivity.class);
-                        startActivity(intent);
-                        getActivity().finish();
-                        Toast.makeText(getActivity(), "Logged Out Successfully", Toast.LENGTH_SHORT).show();
+
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                                startActivity(intent);
+                                alertDialog.dismiss();
+                                getActivity().finish();
+                                Toast.makeText(getActivity(), "Logged Out Successfully", Toast.LENGTH_SHORT).show();
+
+                            }
+                        }, 2000);
                     }
                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
@@ -217,6 +244,10 @@ public class Profile extends Fragment {
                     return params;
                 }
             };
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    30000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
             requestQueue = Volley.newRequestQueue(getActivity());
             requestQueue.add(stringRequest);
@@ -235,6 +266,7 @@ public class Profile extends Fragment {
                         JSONArray jsonArray = jsonObject.getJSONArray("posts");
 
                         if (jsonArray.length() == 0) {
+                            progressBar.setVisibility(View.GONE);
                             noposts.setVisibility(View.VISIBLE);
                         }
 
@@ -264,6 +296,11 @@ public class Profile extends Fragment {
                     return params;
                 }
             };
+            stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                    30000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
             requestQueue.add(stringRequest1);
 
 
@@ -326,13 +363,19 @@ public class Profile extends Fragment {
     class PostAdapter1 extends RecyclerView.Adapter<PostAdapter1.PostViewHolder1> {
 
         JSONArray jsonArray;
-        String uid;
+        String uid, postid;
         Context context;
 
         public PostAdapter1(JSONArray jsonArray, String uid, Context context) {
             this.jsonArray = jsonArray;
             this.uid = uid;
             this.context = context;
+        }
+
+        @Override
+        public void onViewAttachedToWindow(@NonNull PostViewHolder1 holder) {
+            super.onViewAttachedToWindow(holder);
+            progressBar.setVisibility(View.GONE);
         }
 
         @NonNull
@@ -344,15 +387,25 @@ public class Profile extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull PostAdapter1.PostViewHolder1 postViewHolder, int i) {
+        public void onBindViewHolder(@NonNull PostAdapter1.PostViewHolder1 postViewHolder, final int i) {
 
             try {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 Picasso.get().load(jsonObject.getString("image")).into(postViewHolder.postimage);
-
+                postid = jsonObject.getString("uid");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+            postViewHolder.postimage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), ViewPost.class);
+                    intent.putExtra("loginuser", uid);
+                    intent.putExtra("postid", postid);
+                    startActivity(intent);
+                }
+            });
 
         }
 

@@ -1,28 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
         android:padding="5dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="65dp"
             android:layout_height="65dp"
-            android:id="@+id/propic"
+            android:id="@+id/propic1"
             android:background="@drawable/propicback"
             android:scaleType="centerCrop"
             />
 
         <TextView
-            android:id="@+id/postusername"
+            android:id="@+id/postusername1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -33,17 +38,17 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/postpic"
+        android:id="@+id/postpic1"
         android:layout_width="410dp"
         android:layout_height="410dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
         android:scaleType="centerCrop"
         android:background="#e0e0e0"
-         />
+        />
+
+
 
     <TextView
-        android:id="@+id/postdesc"
+        android:id="@+id/postdesc1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="2"
@@ -70,9 +75,9 @@
             <ImageButton
                 android:layout_width="60dp"
                 android:layout_height="match_parent"
-                android:id="@+id/like"
-                android:src="@drawable/like_white"
+                android:id="@+id/like1"
                 android:layout_marginStart="10dp"
+                android:src="@drawable/like_white"
                 android:background="#FFFFFF" />
 
 
@@ -82,7 +87,7 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="10dp"
                 android:gravity="left"
-                android:id="@+id/likesno"
+                android:id="@+id/likesno1"
                 android:textSize="15sp" />
 
         </LinearLayout>
@@ -96,7 +101,7 @@
             <ImageButton
                 android:layout_width="60dp"
                 android:layout_height="match_parent"
-                android:id="@+id/comment"
+                android:id="@+id/comment1"
                 android:layout_marginStart="10dp"
                 android:background="#FFFFFF"
                 android:src="@drawable/commentwhite" />
@@ -108,7 +113,7 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:singleLine="true"
-                android:id="@+id/commentsno"
+                android:id="@+id/commentsno1"
                 android:textSize="15sp" />
 
         </LinearLayout>
@@ -133,7 +138,7 @@
             android:gravity="center_vertical"
             android:hint="@string/write_a_comment"
             android:padding="10dp"
-           android:id="@+id/commenttext"
+            android:id="@+id/commenttext1"
             android:singleLine="true" />
 
         <Button
@@ -142,7 +147,7 @@
             android:layout_gravity="center"
             android:layout_margin="5dp"
             android:layout_weight="1.3"
-            android:id="@+id/postcomment"
+            android:id="@+id/postcomment1"
             android:background="@drawable/button"
             android:text="@string/post" />
 
@@ -156,20 +161,21 @@
 
 
         <TextView
-            android:id="@+id/posttime"
+            android:id="@+id/posttime1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             />
 
         <TextView
-            android:id="@+id/postlocation"
+            android:id="@+id/postlocation1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="10dp"
-             />
+            />
     </RelativeLayout>
 
+    </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

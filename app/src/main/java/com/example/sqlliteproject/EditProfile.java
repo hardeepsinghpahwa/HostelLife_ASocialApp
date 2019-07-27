@@ -1,5 +1,7 @@
 package com.example.sqlliteproject;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
@@ -16,7 +18,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -24,10 +28,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -55,8 +61,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import dmax.dialog.SpotsDialog;
 
 public class EditProfile extends AppCompatActivity {
 
@@ -65,22 +74,24 @@ public class EditProfile extends AppCompatActivity {
     CircleImageView profilepic;
     RadioButton male,female,other;
     Button save;
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     Uri uri=null,resultUri=null;
     DatePickerDialog.OnDateSetListener pDateSetListener;
     StorageReference storageReference;
     TextView inuse;
     private static int PICK_IMAGE = 1;
     ProgressBar progressBar;
+    RelativeLayout relativeLayout;
     String downloadlink,img;
     String un;
     private int pYear;
     private int pMonth;
     static final int DATE_DIALOG_ID = 0;
     private int pDay;
-
-    private static final String PROFILE_URL="https://172.20.8.98/phpmyadmin/login/profile.php";
-    private static final String USERNAME_CHECK_URL="https://172.20.8.98/phpmyadmin/login/checkusername.php";
-    private static final String PROFILE_UPDATE_URL="https://172.20.8.98/phpmyadmin/login/updateprofile.php";
+    ProgressBar progressBar1;
+    private static final String PROFILE_URL=PhpScripts.PROFILE_URL;
+    private static final String USERNAME_CHECK_URL=PhpScripts.USERNAME_CHECK_URL;
+    private static final String PROFILE_UPDATE_URL=PhpScripts.PROFILE_UPDATE_URL;
 
     RequestQueue requestQueue;
     String uid,gen;
@@ -103,10 +114,12 @@ public class EditProfile extends AppCompatActivity {
         other=findViewById(R.id.editother);
         save=findViewById(R.id.save);
         profilepic=findViewById(R.id.pp);
+        relativeLayout=findViewById(R.id.editprofilelayout);
         gender=findViewById(R.id.gen);
         inuse=findViewById(R.id.inuse);
         storageReference = FirebaseStorage.getInstance().getReference();
         progressBar=findViewById(R.id.usernameprogress);
+        progressBar1=findViewById(R.id.editprofileprogressbar);
 
         final Calendar cal = Calendar.getInstance();
         pYear = cal.get(Calendar.YEAR);
@@ -127,6 +140,16 @@ public class EditProfile extends AppCompatActivity {
                         updateDisplay();
                     }
                 };
+
+        relativeLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+
+            }
+        });
 
         uid=getIntent().getStringExtra("uid");
 
@@ -181,6 +204,7 @@ public class EditProfile extends AppCompatActivity {
                     Picasso.get().load(jsonObject2.getString("image")).into(profilepic);
                     description.setText(jsonObject2.getString("description"));
 
+                    progressBar1.setVisibility(View.GONE);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -202,7 +226,10 @@ public class EditProfile extends AppCompatActivity {
                 return params;
             }
         };
-
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue= Volley.newRequestQueue(EditProfile.this);
         requestQueue.add(stringRequest);
 
@@ -268,7 +295,10 @@ public class EditProfile extends AppCompatActivity {
                         return params;
                     }
                 };
-
+                stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                        30000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 requestQueue.add(stringRequest1);
 
             }
@@ -305,13 +335,32 @@ public class EditProfile extends AppCompatActivity {
                         break;
                 }
 
-
-                if(inuse.getVisibility()==View.VISIBLE)
+                if (name.getText().toString().equals("")) {
+                    name.setError("This can't be empty");
+                    name.requestFocus();
+                } else if (email.getText().toString().equals("")) {
+                    email.setError("This can't be empty");
+                    email.requestFocus();
+                } else if (!validate(email.getText().toString())) {
+                    email.setError("Incorrect Email");
+                    email.requestFocus();
+                } else if (username.getText().toString().equals("")) {
+                    username.setError("This can't be empty");
+                    username.requestFocus();
+                }
+                else if(inuse.getVisibility()==View.VISIBLE || progressBar.getVisibility()==(View.VISIBLE))
                 {
                     username.requestFocus();
                 }
                 else {
                 if (resultUri != null) {
+                    final AlertDialog alertDialog = new SpotsDialog.Builder()
+                            .setContext(EditProfile.this)
+                            .setMessage("Logging you in")
+                            .setCancelable(false)
+                            .setTheme(R.style.Custom)
+                            .build();
+                    alertDialog.show();
                     storageReference = storageReference.child("Profile Pictures/" + username.getText().toString());
                     UploadTask uploadTask = storageReference.putFile(resultUri);
                     Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
@@ -341,9 +390,11 @@ public class EditProfile extends AppCompatActivity {
                                             Log.i("suc", success);
 
                                             if (success.equals("0")) {
+                                                alertDialog.dismiss();
                                                 Log.i("update", "failed");
                                                 Toast.makeText(EditProfile.this, "Failed to save changes", Toast.LENGTH_SHORT).show();
                                             } else if (success.equals("1")) {
+                                                alertDialog.dismiss();
                                                 Log.i("update", "success");
                                                 Toast.makeText(EditProfile.this, "Changes Saved", Toast.LENGTH_SHORT).show();
                                                 finish();
@@ -366,7 +417,7 @@ public class EditProfile extends AppCompatActivity {
 
                                         params.put("name", name.getText().toString());
                                         params.put("email", email.getText().toString());
-                                        params.put("username", username.getText().toString());
+                                        params.put("username", username.getText().toString().toLowerCase());
                                         params.put("image", downloadlink);
                                         params.put("description", description.getText().toString());
                                         params.put("birthday", bdate.getText().toString());
@@ -384,6 +435,10 @@ public class EditProfile extends AppCompatActivity {
 
                                     }
                                 };
+                                stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                                        30000,
+                                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                                 requestQueue.add(stringRequest1);
 
                             }
@@ -392,7 +447,13 @@ public class EditProfile extends AppCompatActivity {
                     });
                 }
                 else {
-
+                    final AlertDialog alertDialog = new SpotsDialog.Builder()
+                            .setContext(EditProfile.this)
+                            .setMessage("Saving details")
+                            .setCancelable(false)
+                            .setTheme(R.style.Custom)
+                            .build();
+                    alertDialog.show();
                 StringRequest stringRequest1=new StringRequest(Request.Method.POST, PROFILE_UPDATE_URL, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -404,9 +465,11 @@ public class EditProfile extends AppCompatActivity {
 
                             if (success.equals("0")) {
                                 Log.i("update", "failed");
+                                alertDialog.dismiss();
                                 Toast.makeText(EditProfile.this, "Failed to save changes", Toast.LENGTH_SHORT).show();
                             } else if (success.equals("1")) {
                                 Log.i("update", "success");
+                                alertDialog.dismiss();
                                 Toast.makeText(EditProfile.this, "Changes Saved", Toast.LENGTH_SHORT).show();
                                 finish();
                             }
@@ -449,7 +512,10 @@ public class EditProfile extends AppCompatActivity {
                         return params;
                     }
                 };
-
+                    stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                            30000,
+                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 requestQueue.add(stringRequest1);
             }
             }
@@ -507,6 +573,10 @@ public class EditProfile extends AppCompatActivity {
                         pYear, pMonth, pDay);
         }
         return null;
+    }
+    public static boolean validate(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.find();
     }
 
     @Override
