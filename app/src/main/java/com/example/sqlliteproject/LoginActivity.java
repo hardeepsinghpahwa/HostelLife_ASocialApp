@@ -95,6 +95,9 @@ public class LoginActivity extends AppCompatActivity{
 
             }
         });
+        
+        email.setText("hardeepsingh3485.in@gmail.com");
+        password.setText("hello1234");
 
 
 
