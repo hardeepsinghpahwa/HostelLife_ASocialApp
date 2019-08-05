@@ -231,10 +231,10 @@ public class ProfileDetails extends AppCompatActivity {
                     try {
                         JSONObject object=jsonArray.getJSONObject(i);
 
-                        Intent i=new Intent(context,ViewPost.class);
-                        i.putExtra("postid",object.getString("uid"));
-                        i.putExtra("loginuser",loginuser);
-                        startActivity(i);
+                        Intent in=new Intent(context,ViewPost.class);
+                        in.putExtra("postid",object.getString("uid"));
+                        in.putExtra("loginuser",loginuser);
+                        startActivity(in);
 
                     } catch (JSONException e) {
                         e.printStackTrace();

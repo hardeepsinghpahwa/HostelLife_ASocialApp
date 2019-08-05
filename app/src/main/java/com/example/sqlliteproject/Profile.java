@@ -400,10 +400,17 @@ public class Profile extends Fragment {
             postViewHolder.postimage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), ViewPost.class);
-                    intent.putExtra("loginuser", uid);
-                    intent.putExtra("postid", postid);
-                    startActivity(intent);
+
+                    try {
+                        JSONObject object = jsonArray.getJSONObject(i);
+
+                        Intent intent = new Intent(getActivity(), ViewPost.class);
+                        intent.putExtra("loginuser", uid);
+                        intent.putExtra("postid", object.getString("uid"));
+                        startActivity(intent);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 

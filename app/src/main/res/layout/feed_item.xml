@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#FFFFFF"
     android:orientation="vertical">
 
@@ -67,13 +68,16 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <ImageButton
+            <com.varunest.sparkbutton.SparkButton
+                android:id="@+id/like"
                 android:layout_width="60dp"
                 android:layout_height="match_parent"
-                android:id="@+id/like"
-                android:src="@drawable/like_white"
+                app:sparkbutton_activeImage="@drawable/likee"
+                app:sparkbutton_inActiveImage="@drawable/nolike"
+                app:sparkbutton_iconSize="40dp"
                 android:layout_marginStart="10dp"
-                android:background="#FFFFFF" />
+                app:sparkbutton_primaryColor="@color/colorPrimary"
+                app:sparkbutton_secondaryColor="@color/colorPrimaryDark" />
 
 
             <TextView

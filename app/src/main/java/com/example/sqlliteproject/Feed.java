@@ -50,6 +50,8 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.varunest.sparkbutton.SparkButton;
+import com.varunest.sparkbutton.SparkEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -462,7 +464,7 @@ public class Feed extends Fragment {
                                 final String success = jsonObject.getString("success");
 
                                 if (success.equals("1")) {
-                                    viewHolderClass.like.setImageResource(R.drawable.green_like);
+                                    viewHolderClass.like.setChecked(true);
                                 }
 
 
@@ -646,15 +648,135 @@ public class Feed extends Fragment {
 
 
 
+                viewHolderClass.like.setEventListener(new SparkEventListener() {
+                    @Override
+                    public void onEvent(ImageView button, boolean buttonState) {
+                        try {
+                            JSONObject object = jsonArray.getJSONObject(i);
+                            pid = object.getString("uid");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if (buttonState) {
+                            Toast.makeText(context, "Active", Toast.LENGTH_SHORT).show();
+                            viewHolderClass.like.setClickable(false);
+
+
+                            StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    JSONObject jsonObject1 = null;
+                                    try {
+                                        jsonObject1 = new JSONObject(response);
+                                        String likes = jsonObject1.getString("likes");
+                                        if ((Integer.parseInt(likes) > 1)) {
+                                            viewHolderClass.likes.setText(likes + " likes");
+                                            viewHolderClass.like.setClickable(true);
+                                        } else {
+                                            viewHolderClass.likes.setText(likes + " like");
+                                            viewHolderClass.like.setClickable(true);
+                                        }
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+
+                                }
+                            }) {
+                                @Override
+                                protected Map<String, String> getParams() throws AuthFailureError {
+
+                                    Map<String, String> params = new HashMap<>();
+                                    params.put("success", "0");
+                                    params.put("user_id", uid);
+                                    params.put("post_id", pid);
+
+                                    return params;
+                                }
+
+                            };
+                            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                    30000,
+                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                            requestQueue.add(stringRequest);
+
+                        }
+                        else{
+                            Toast.makeText(context, "Inactive", Toast.LENGTH_SHORT).show();
+                            viewHolderClass.like.setClickable(false);
+
+                            StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    JSONObject jsonObject1 = null;
+                                    try {
+                                        jsonObject1 = new JSONObject(response);
+                                        String likes = jsonObject1.getString("likes");
+                                        if ((Integer.parseInt(likes) > 1)) {
+                                            viewHolderClass.likes.setText(likes + " likes");
+                                            viewHolderClass.like.setClickable(true);
+                                        } else {
+                                            viewHolderClass.likes.setText(likes + " like");
+                                            viewHolderClass.like.setClickable(true);
+                                        }
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+
+                                }
+                            }) {
+                                @Override
+                                protected Map<String, String> getParams() throws AuthFailureError {
+
+                                    Map<String, String> params = new HashMap<>();
+                                    params.put("success", "1");
+                                    params.put("user_id", uid);
+                                    params.put("post_id", pid);
+
+                                    return params;
+                                }
+
+                            };  stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                    30000,
+                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                            requestQueue.add(stringRequest);
+                        }
+                    }
+
+                    @Override
+                    public void onEventAnimationEnd(ImageView button, boolean buttonState) {
+
+                    }
+
+                    @Override
+                    public void onEventAnimationStart(ImageView button, boolean buttonState) {
+
+                    }
+                });
 
 
 
 
 
+                /*
                 viewHolderClass.like.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        viewHolderClass.like.setClickable(false);
                         try {
                             JSONObject object = jsonArray.getJSONObject(i);
                             pid = object.getString("uid");
@@ -671,7 +793,6 @@ public class Feed extends Fragment {
                                     final String success = jsonObject.getString("success");
 
                                     if (success.equals("1")) {
-                                        viewHolderClass.like.setImageResource(R.drawable.like_white);
                                         StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
@@ -681,10 +802,10 @@ public class Feed extends Fragment {
                                                     String likes = jsonObject1.getString("likes");
                                                     if ((Integer.parseInt(likes) > 1)) {
                                                         viewHolderClass.likes.setText(likes + " likes");
-                                                        viewHolderClass.like.setClickable(true);
+                                                        viewHolderClass.like.pressOnTouch(true);
                                                     } else {
                                                         viewHolderClass.likes.setText(likes + " like");
-                                                        viewHolderClass.like.setClickable(true);
+                                                        viewHolderClass.like.pressOnTouch(true);
                                                     }
 
                                                 } catch (JSONException e) {
@@ -717,7 +838,6 @@ public class Feed extends Fragment {
                                         requestQueue.add(stringRequest);
 
                                     } else if (success.equals("0")) {
-                                        viewHolderClass.like.setImageResource(R.drawable.green_like);
                                         StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
@@ -727,10 +847,10 @@ public class Feed extends Fragment {
                                                     String likes = jsonObject1.getString("likes");
                                                     if ((Integer.parseInt(likes) > 1)) {
                                                         viewHolderClass.likes.setText(likes + " likes");
-                                                        viewHolderClass.like.setClickable(true);
+                                                        viewHolderClass.like.pressOnTouch(true);
                                                     } else {
                                                         viewHolderClass.likes.setText(likes + " like");
-                                                        viewHolderClass.like.setClickable(true);
+                                                        viewHolderClass.like.pressOnTouch(true);
                                                     }
 
                                                 } catch (JSONException e) {
@@ -796,7 +916,7 @@ public class Feed extends Fragment {
                         requestQueue.add(stringRequest1);
 
                     }
-                });
+                });*/
 
 
                 viewHolderClass.comment.setOnClickListener(new View.OnClickListener() {
@@ -824,7 +944,8 @@ public class Feed extends Fragment {
             EditText commenttext;
             CircleImageView propic;
             Button postcomment;
-            ImageButton like, comment;
+            ImageButton comment;
+            SparkButton like;
             String no;
 
             public ViewHolderClass(@NonNull View itemView) {

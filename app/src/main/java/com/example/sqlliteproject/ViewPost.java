@@ -23,6 +23,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
+import com.varunest.sparkbutton.SparkButton;
+import com.varunest.sparkbutton.SparkEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +56,8 @@ public class ViewPost extends AppCompatActivity {
     EditText commenttext;
     CircleImageView propic;
     Button postcomment;
-    ImageButton like, comment;
+    ImageButton comment;
+    SparkButton like;
     String loginuser;
     String time1, img, desc, loc, likes1, userid1, comments1;
 
@@ -248,7 +251,7 @@ public class ViewPost extends AppCompatActivity {
                     final String success = jsonObject.getString("success");
 
                     if (success.equals("1")) {
-                        like.setImageResource(R.drawable.green_like);
+                        like.setChecked(true);
                     }
 
 
@@ -365,7 +368,120 @@ public class ViewPost extends AppCompatActivity {
         });
 
 
-        like.setOnClickListener(new View.OnClickListener() {
+        like.setEventListener(new SparkEventListener() {
+            @Override
+            public void onEvent(ImageView button, boolean buttonState) {
+                if (buttonState) {
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            JSONObject jsonObject1 = null;
+                            try {
+                                jsonObject1 = new JSONObject(response);
+                                String likess = jsonObject1.getString("likes");
+                                if ((Integer.parseInt(likess) > 1)) {
+                                    likes.setText(likess + " likes");
+                                    like.setClickable(true);
+
+                                } else {
+                                    like.setClickable(true);
+                                    likes.setText(likess + " like");
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    }) {
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+
+                            Map<String, String> params = new HashMap<>();
+                            params.put("success", "0");
+                            params.put("user_id", loginuser);
+                            params.put("post_id", postid);
+
+                            return params;
+                        }
+
+                    };
+                    stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                            30000,
+                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+                    requestQueue.add(stringRequest);
+                }
+
+                else {
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            JSONObject jsonObject1 = null;
+                            try {
+                                jsonObject1 = new JSONObject(response);
+                                String likess = jsonObject1.getString("likes");
+                                if ((Integer.parseInt(likess) > 1)) {
+                                    likes.setText(likess + " likes");
+                                    like.setClickable(true);
+                                } else {
+                                    like.setClickable(true);
+                                    likes.setText(likess + " like");
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    }) {
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+
+                            Map<String, String> params = new HashMap<>();
+                            params.put("success", "1");
+                            params.put("user_id", loginuser);
+                            params.put("post_id", postid);
+
+                            return params;
+                        }
+
+                    };
+                    stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                            30000,
+                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+                    requestQueue.add(stringRequest);
+
+                }
+            }
+
+            @Override
+            public void onEventAnimationEnd(ImageView button, boolean buttonState) {
+
+            }
+
+            @Override
+            public void onEventAnimationStart(ImageView button, boolean buttonState) {
+
+            }
+        });
+
+        /*like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 like.setClickable(false);
@@ -379,101 +495,10 @@ public class ViewPost extends AppCompatActivity {
                             final String success = jsonObject.getString("success");
 
                             if (success.equals("1")) {
-                                like.setImageResource(R.drawable.like_white);
-                                StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
-                                    @Override
-                                    public void onResponse(String response) {
-                                        JSONObject jsonObject1 = null;
-                                        try {
-                                            jsonObject1 = new JSONObject(response);
-                                            String likess = jsonObject1.getString("likes");
-                                            if ((Integer.parseInt(likess) > 1)) {
-                                                likes.setText(likess + " likes");
-                                                like.setClickable(true);
-                                            } else {
-                                                like.setClickable(true);
-                                                likes.setText(likess + " like");
-                                            }
 
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-
-
-                                    }
-                                }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-
-                                    }
-                                }) {
-                                    @Override
-                                    protected Map<String, String> getParams() throws AuthFailureError {
-
-                                        Map<String, String> params = new HashMap<>();
-                                        params.put("success", success);
-                                        params.put("user_id", loginuser);
-                                        params.put("post_id", postid);
-
-                                        return params;
-                                    }
-
-                                };
-                                stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                                        30000,
-                                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-                                requestQueue.add(stringRequest);
 
                             } else if (success.equals("0")) {
-                                like.setImageResource(R.drawable.green_like);
-                                StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
-                                    @Override
-                                    public void onResponse(String response) {
-                                        JSONObject jsonObject1 = null;
-                                        try {
-                                            jsonObject1 = new JSONObject(response);
-                                            String likess = jsonObject1.getString("likes");
-                                            if ((Integer.parseInt(likess) > 1)) {
-                                                likes.setText(likess + " likes");
-                                                like.setClickable(true);
 
-                                            } else {
-                                                like.setClickable(true);
-                                                likes.setText(likess + " like");
-                                            }
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-
-
-                                    }
-                                }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-
-                                    }
-                                }) {
-                                    @Override
-                                    protected Map<String, String> getParams() throws AuthFailureError {
-
-                                        Map<String, String> params = new HashMap<>();
-                                        params.put("success", success);
-                                        params.put("user_id", loginuser);
-                                        params.put("post_id", postid);
-
-                                        return params;
-                                    }
-
-                                };
-                                stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                                        30000,
-                                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-                                requestQueue.add(stringRequest);
 
                             }
 
@@ -509,7 +534,7 @@ public class ViewPost extends AppCompatActivity {
                 requestQueue.add(stringRequest1);
 
             }
-        });
+        });*/
 
 
         comment.setOnClickListener(new View.OnClickListener() {
