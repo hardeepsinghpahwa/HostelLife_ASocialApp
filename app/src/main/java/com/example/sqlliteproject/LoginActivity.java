@@ -96,6 +96,8 @@ public class LoginActivity extends AppCompatActivity{
             }
         });
 
+
+
         handleSSLHandshake();
 
         register.setOnClickListener(new View.OnClickListener() {
