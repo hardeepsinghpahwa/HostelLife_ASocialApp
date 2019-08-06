@@ -372,6 +372,10 @@ public class ViewPost extends AppCompatActivity {
             @Override
             public void onEvent(ImageView button, boolean buttonState) {
                 if (buttonState) {
+
+                    like.setEnabled(false);
+                    like.setClickable(false);
+
                     StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -382,8 +386,10 @@ public class ViewPost extends AppCompatActivity {
                                 if ((Integer.parseInt(likess) > 1)) {
                                     likes.setText(likess + " likes");
                                     like.setClickable(true);
+                                    like.setEnabled(true);
 
                                 } else {
+                                    like.setEnabled(true);
                                     like.setClickable(true);
                                     likes.setText(likess + " like");
                                 }
@@ -421,6 +427,10 @@ public class ViewPost extends AppCompatActivity {
                 }
 
                 else {
+
+                    like.setEnabled(false);
+                    like.setClickable(false);
+
                     StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -430,8 +440,10 @@ public class ViewPost extends AppCompatActivity {
                                 String likess = jsonObject1.getString("likes");
                                 if ((Integer.parseInt(likess) > 1)) {
                                     likes.setText(likess + " likes");
+                                    like.setEnabled(true);
                                     like.setClickable(true);
                                 } else {
+                                    like.setEnabled(true);
                                     like.setClickable(true);
                                     likes.setText(likess + " like");
                                 }

@@ -16,10 +16,12 @@
         android:src="@mipmap/logo1" />
 
     <ProgressBar
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
+        android:theme="@style/Pbar"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="30dp" />
+
 
 </RelativeLayout>

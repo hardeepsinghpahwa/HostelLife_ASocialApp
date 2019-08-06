@@ -658,8 +658,8 @@ public class Feed extends Fragment {
                             e.printStackTrace();
                         }
                         if (buttonState) {
-                            Toast.makeText(context, "Active", Toast.LENGTH_SHORT).show();
                             viewHolderClass.like.setClickable(false);
+                            viewHolderClass.like.setEnabled(false);
 
 
                             StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
@@ -672,9 +672,13 @@ public class Feed extends Fragment {
                                         if ((Integer.parseInt(likes) > 1)) {
                                             viewHolderClass.likes.setText(likes + " likes");
                                             viewHolderClass.like.setClickable(true);
+                                            viewHolderClass.like.setEnabled(true);
+
                                         } else {
                                             viewHolderClass.likes.setText(likes + " like");
                                             viewHolderClass.like.setClickable(true);
+                                            viewHolderClass.like.setEnabled(true);
+
                                         }
 
                                     } catch (JSONException e) {
@@ -709,8 +713,8 @@ public class Feed extends Fragment {
 
                         }
                         else{
-                            Toast.makeText(context, "Inactive", Toast.LENGTH_SHORT).show();
                             viewHolderClass.like.setClickable(false);
+                            viewHolderClass.like.setEnabled(false);
 
                             StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
                                 @Override
@@ -722,9 +726,13 @@ public class Feed extends Fragment {
                                         if ((Integer.parseInt(likes) > 1)) {
                                             viewHolderClass.likes.setText(likes + " likes");
                                             viewHolderClass.like.setClickable(true);
+                                            viewHolderClass.like.setEnabled(true);
+
                                         } else {
                                             viewHolderClass.likes.setText(likes + " like");
                                             viewHolderClass.like.setClickable(true);
+                                            viewHolderClass.like.setEnabled(true);
+
                                         }
 
                                     } catch (JSONException e) {
