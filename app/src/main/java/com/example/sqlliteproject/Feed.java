@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,8 +17,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,6 +92,7 @@ public class Feed extends Fragment {
     String profilepic;
     TextView noposts;
     String json;
+    Toolbar toolbar;
     public String userid;
     ProgressBar progressBar;
 
@@ -168,9 +172,12 @@ public class Feed extends Fragment {
         progressBar=v.findViewById(R.id.feedprogressbar);
         scrollView=v.findViewById(R.id.scrollview);
         noposts=v.findViewById(R.id.feednoposts);
+        toolbar=v.findViewById(R.id.toolbar);
         scrollView.setSmoothScrollingEnabled(true);
         scrollView.smoothScrollTo(6,6);
 
+
+        ((AppCompatActivity)(getActivity())).setSupportActionBar(toolbar);
         ServiceManager serviceManager = new ServiceManager(getActivity());
         if (!serviceManager.isNetworkAvailable()) {
             startActivity(new Intent(getActivity(),NoInternet.class));
@@ -331,7 +338,6 @@ public class Feed extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull final AdapterClass.ViewHolderClass viewHolderClass, final int i) {
-
 
             try {
 
