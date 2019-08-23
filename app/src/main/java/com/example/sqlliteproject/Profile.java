@@ -5,15 +5,22 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -31,6 +38,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+import com.facebook.shimmer.ShimmerFrameLayout;
+import com.github.siyamed.shapeimageview.HexagonImageView;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -46,6 +58,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
+import jp.wasabeef.blurry.Blurry;
 
 public class Profile extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -57,16 +70,19 @@ public class Profile extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    TextView username, desc, email, phn, name, gender, birthday, noposts;
+    TextView username,username2, desc, email, phn, name, birthday, noposts;
     CircleImageView propic;
-    ImageView edit;
-    LinearLayout me;
+    ImageView edit,back;
+    LinearLayout me,about,info;
     AlertDialog alertDialog;
     String uid, json;
-    Button logout;
-    ProgressBar progressBar;
+    TextView logout,followers,following,postsno;
+    SpinKitView progressBar;
+    AppBarLayout appBar;
     SharedPreferences shared;
     RecyclerView posts;
+    Toolbar toolbar;
+    LinearLayout l1;
     RequestQueue requestQueue;
     private static final String PROFILE_URL = PhpScripts.PROFILE_URL;
     private static final String GETPOSTSURL = PhpScripts.GETPOSTSURL;
@@ -109,7 +125,7 @@ public class Profile extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_profile, container, false);
+        final View v = inflater.inflate(R.layout.fragment_profile, container, false);
 
         ServiceManager serviceManager = new ServiceManager(getActivity());
         if (!serviceManager.isNetworkAvailable()) {
@@ -123,13 +139,51 @@ public class Profile extends Fragment {
         desc = v.findViewById(R.id.description);
         propic = v.findViewById(R.id.ppic);
         edit = v.findViewById(R.id.editprofile);
-        gender = v.findViewById(R.id.gender);
         birthday = v.findViewById(R.id.birthday);
         noposts = v.findViewById(R.id.nopostsyet);
         posts = v.findViewById(R.id.profileposts);
         logout = v.findViewById(R.id.logout);
-        progressBar = v.findViewById(R.id.profileprogessbar);
+        progressBar = v.findViewById(R.id.profileprogressbar);
+        appBar=v.findViewById(R.id.app_bar);
+        toolbar=v.findViewById(R.id.toolbarprofile);
+        l1=v.findViewById(R.id.l1);
+        followers=v.findViewById(R.id.followers);
+        following=v.findViewById(R.id.following);
+        postsno=v.findViewById(R.id.postsno);
+        username2=v.findViewById(R.id.user_name2);
+        me=v.findViewById(R.id.l1);
+        about=v.findViewById(R.id.about);
+        info=v.findViewById(R.id.info);
+        back=v.findViewById(R.id.back);
 
+        appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            boolean isShow = false;
+            int scrollRange = -1;
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    isShow = true;
+                    username.setVisibility(View.VISIBLE);
+                    l1.setVisibility(View.INVISIBLE);
+                    logout.setVisibility(View.VISIBLE);
+                    toolbar.setVisibility(View.VISIBLE);
+                    YoYo.with(Techniques.FadeIn)
+                            .duration(700)
+                            .playOn(toolbar);
+                } else if (isShow) {
+                    isShow = false;
+                    username.setVisibility(View.INVISIBLE);
+                    l1.setVisibility(View.VISIBLE);
+                    logout.setVisibility(View.INVISIBLE);
+                    toolbar.setVisibility(View.GONE);
+
+                }
+            }
+        });
 
         shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
 
@@ -200,8 +254,11 @@ public class Profile extends Fragment {
                         JSONArray jsonArray = jsonObject1.getJSONArray("details");
                         JSONObject jsonObject2 = jsonArray.getJSONObject(0);
 
+                        back.setVisibility(View.VISIBLE);
                         name.setText(jsonObject2.getString("name"));
                         username.setText(jsonObject2.getString("username"));
+                        username2.setText("@"+jsonObject2.getString("username"));
+
                         if (jsonObject2.getString("email").equals("")) {
                             email.setVisibility(View.GONE);
                         }
@@ -209,18 +266,32 @@ public class Profile extends Fragment {
                         if (jsonObject2.getString("phone").equals("0")) {
                             phn.setVisibility(View.GONE);
                         }
-                        gender.setText(jsonObject2.getString("gender"));
                         Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
                         SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
                         String d = format.format(date1);
                         birthday.setText(d);
                         Picasso.get().load(jsonObject2.getString("image")).into(propic);
+                        propic.setVisibility(View.VISIBLE);
+
+                        YoYo.with(Techniques.FlipInX)
+                                .duration(700)
+                                .playOn(propic);
                         if (jsonObject2.getString("description").equals("")) {
                             desc.setHint("Edit to add a description");
                             desc.setTextSize(15);
                         }
                         desc.setText(jsonObject2.getString("description"));
+                        me.setVisibility(View.VISIBLE);
 
+                        YoYo.with(Techniques.FadeInUp)
+                                .duration(700)
+                                .playOn(about);
+                        YoYo.with(Techniques.FadeInUp)
+                                .duration(700)
+                                .playOn(info);
+                        about.setVisibility(View.VISIBLE);
+                        info.setVisibility(View.VISIBLE);
+                        edit.setVisibility(View.VISIBLE);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -253,7 +324,7 @@ public class Profile extends Fragment {
             requestQueue.add(stringRequest);
 
 
-            posts.setLayoutManager(new GridLayoutManager(getActivity(), 4));
+            posts.setLayoutManager(new GridLayoutManager(getActivity(),3));
 
 
             StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {

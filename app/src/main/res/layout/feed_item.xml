@@ -72,8 +72,8 @@
                 android:id="@+id/like"
                 android:layout_width="60dp"
                 android:layout_height="match_parent"
-                app:sparkbutton_activeImage="@drawable/likee"
-                app:sparkbutton_inActiveImage="@drawable/nolike"
+                app:sparkbutton_activeImage="@drawable/like"
+                app:sparkbutton_inActiveImage="@drawable/notlike"
                 app:sparkbutton_iconSize="40dp"
                 android:layout_marginStart="10dp"
                 app:sparkbutton_primaryColor="@color/colorPrimary"
@@ -98,19 +98,21 @@
             android:layout_weight="1">
 
             <ImageButton
-                android:layout_width="60dp"
-                android:layout_height="match_parent"
+                android:layout_width="40dp"
+                android:layout_height="35dp"
                 android:id="@+id/comment"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:background="#FFFFFF"
-                android:src="@drawable/commentwhite" />
+                android:src="@drawable/commentorange" />
 
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="20dp"
                 android:singleLine="true"
                 android:id="@+id/commentsno"
                 android:textSize="15sp" />

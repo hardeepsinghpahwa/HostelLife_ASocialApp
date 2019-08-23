@@ -44,6 +44,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -94,7 +95,7 @@ public class Feed extends Fragment {
     String json;
     Toolbar toolbar;
     public String userid;
-    ProgressBar progressBar;
+    SpinKitView progressBar;
 
     private OnFragmentInteractionListener mListener;
 
