@@ -230,161 +230,159 @@ public class Profile extends Fragment {
             }
         });
 
-        try {
-            if (getActivity().getIntent().getStringExtra("json") == null) {
-                SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+        /* if (getActivity().getIntent().getStringExtra("json") == null) {
+             SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
 
-                json = shared.getString("json", "");
+             json = shared.getString("json", "");
 
-            } else {
-                json = getActivity().getIntent().getStringExtra("json");
-            }
-
-
-            JSONObject jsonObject = new JSONObject(json);
-
-            uid = jsonObject.getString("uid");
+         } else {
+             json = getActivity().getIntent().getStringExtra("json");
+         }
 
 
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject1 = new JSONObject(response);
-                        JSONArray jsonArray = jsonObject1.getJSONArray("details");
-                        JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+         JSONObject jsonObject = new JSONObject(json);
 
-                        back.setVisibility(View.VISIBLE);
-                        name.setText(jsonObject2.getString("name"));
-                        username.setText(jsonObject2.getString("username"));
-                        username2.setText("@"+jsonObject2.getString("username"));
-
-                        if (jsonObject2.getString("email").equals("")) {
-                            email.setVisibility(View.GONE);
-                        }
-                        email.setText(jsonObject2.getString("email"));
-                        if (jsonObject2.getString("phone").equals("0")) {
-                            phn.setVisibility(View.GONE);
-                        }
-                        Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
-                        SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
-                        String d = format.format(date1);
-                        birthday.setText(d);
-                        Picasso.get().load(jsonObject2.getString("image")).into(propic);
-                        propic.setVisibility(View.VISIBLE);
-
-                        YoYo.with(Techniques.FlipInX)
-                                .duration(700)
-                                .playOn(propic);
-                        if (jsonObject2.getString("description").equals("")) {
-                            desc.setHint("Edit to add a description");
-                            desc.setTextSize(15);
-                        }
-                        desc.setText(jsonObject2.getString("description"));
-                        me.setVisibility(View.VISIBLE);
-
-                        YoYo.with(Techniques.FadeInUp)
-                                .duration(700)
-                                .playOn(about);
-                        YoYo.with(Techniques.FadeInUp)
-                                .duration(700)
-                                .playOn(info);
-                        about.setVisibility(View.VISIBLE);
-                        info.setVisibility(View.VISIBLE);
-                        edit.setVisibility(View.VISIBLE);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-
-                    Map<String, String> params = new HashMap<>();
-                    params.put("userid", uid);
-
-                    return params;
-                }
-            };
-            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                    30000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-            requestQueue = Volley.newRequestQueue(getActivity());
-            requestQueue.add(stringRequest);
+         uid = jsonObject.getString("uid");
 
 
-            posts.setLayoutManager(new GridLayoutManager(getActivity(),3));
+         StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+             @Override
+             public void onResponse(String response) {
+                 try {
+                     JSONObject jsonObject1 = new JSONObject(response);
+                     JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                     JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+
+                     back.setVisibility(View.VISIBLE);
+                     name.setText(jsonObject2.getString("name"));
+                     username.setText(jsonObject2.getString("username"));
+                     username2.setText("@"+jsonObject2.getString("username"));
+
+                     if (jsonObject2.getString("email").equals("")) {
+                         email.setVisibility(View.GONE);
+                     }
+                     email.setText(jsonObject2.getString("email"));
+                     if (jsonObject2.getString("phone").equals("0")) {
+                         phn.setVisibility(View.GONE);
+                     }
+                     Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
+                     SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+                     String d = format.format(date1);
+                     birthday.setText(d);
+                     Picasso.get().load(jsonObject2.getString("image")).into(propic);
+                     propic.setVisibility(View.VISIBLE);
+
+                     YoYo.with(Techniques.FlipInX)
+                             .duration(700)
+                             .playOn(propic);
+                     if (jsonObject2.getString("description").equals("")) {
+                         desc.setHint("Edit to add a description");
+                         desc.setTextSize(15);
+                     }
+                     desc.setText(jsonObject2.getString("description"));
+                     me.setVisibility(View.VISIBLE);
+
+                     YoYo.with(Techniques.FadeInUp)
+                             .duration(700)
+                             .playOn(about);
+                     YoYo.with(Techniques.FadeInUp)
+                             .duration(700)
+                             .playOn(info);
+                     back.setFocusable(false);
+                     about.setVisibility(View.VISIBLE);
+                     info.setVisibility(View.VISIBLE);
+                     edit.setVisibility(View.VISIBLE);
+                     edit.setFocusable(true);
+                     edit.bringToFront();
+
+                 } catch (JSONException e) {
+                     e.printStackTrace();
+                 } catch (ParseException e) {
+                     e.printStackTrace();
+                 }
+
+             }
+         }, new Response.ErrorListener() {
+             @Override
+             public void onErrorResponse(VolleyError error) {
+
+             }
+         }) {
+             @Override
+             protected Map<String, String> getParams() throws AuthFailureError {
+
+                 Map<String, String> params = new HashMap<>();
+                 params.put("userid", uid);
+
+                 return params;
+             }
+         };
+         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                 30000,
+                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+         requestQueue = Volley.newRequestQueue(getActivity());
+         requestQueue.add(stringRequest);
 
 
-            StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        Log.i("res", response);
-
-                        JSONObject jsonObject = new JSONObject(response);
-                        JSONArray jsonArray = jsonObject.getJSONArray("posts");
-
-                        if (jsonArray.length() == 0) {
-                            progressBar.setVisibility(View.GONE);
-                            noposts.setVisibility(View.VISIBLE);
-                        }
-
-                        posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
+         posts.setLayoutManager(new GridLayoutManager(getActivity(),3));
 
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Log.i("success", e.toString());
-                    }
+         StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
+             @Override
+             public void onResponse(String response) {
+                 try {
+                     Log.i("res", response);
 
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.i("success", error.toString());
+                     JSONObject jsonObject = new JSONObject(response);
+                     JSONArray jsonArray = jsonObject.getJSONArray("posts");
 
-                }
-            }
-            ) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
+                     if (jsonArray.length() == 0) {
+                         progressBar.setVisibility(View.GONE);
+                         noposts.setVisibility(View.VISIBLE);
+                     }
 
-                    Map<String, String> params = new HashMap<>();
-                    params.put("userid", uid);
-
-                    return params;
-                }
-            };
-            stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
-                    30000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-            requestQueue.add(stringRequest1);
+                     posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
 
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+                 } catch (JSONException e) {
+                     e.printStackTrace();
+                     Log.i("success", e.toString());
+                 }
 
+             }
+         }, new Response.ErrorListener() {
+             @Override
+             public void onErrorResponse(VolleyError error) {
+                 Log.i("success", error.toString());
+
+             }
+         }
+         ) {
+             @Override
+             protected Map<String, String> getParams() throws AuthFailureError {
+
+                 Map<String, String> params = new HashMap<>();
+                 params.put("userid", uid);
+
+                 return params;
+             }
+         };
+         stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                 30000,
+                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+         requestQueue.add(stringRequest1);
+*/
         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), EditProfile.class);
                 i.putExtra("uid", uid);
                 startActivity(i);
+                getActivity().overridePendingTransition(R.anim.fadein,R.anim.fadeout);
             }
         });
 
@@ -407,6 +405,162 @@ public class Profile extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity().getIntent().getStringExtra("json") == null) {
+            SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+
+            json = shared.getString("json", "");
+
+        } else {
+            json = getActivity().getIntent().getStringExtra("json");
+        }
+
+
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json);
+
+            uid = jsonObject.getString("uid");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject1 = new JSONObject(response);
+                    JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                    JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+
+                    back.setVisibility(View.VISIBLE);
+                    name.setText(jsonObject2.getString("name"));
+                    username.setText(jsonObject2.getString("username"));
+                    username2.setText("@"+jsonObject2.getString("username"));
+
+                    if (jsonObject2.getString("email").equals("")) {
+                        email.setVisibility(View.GONE);
+                    }
+                    email.setText(jsonObject2.getString("email"));
+                    if (jsonObject2.getString("phone").equals("0")) {
+                        phn.setVisibility(View.GONE);
+                    }
+                    Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
+                    SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+                    String d = format.format(date1);
+                    birthday.setText(d);
+                    Picasso.get().load(jsonObject2.getString("image")).into(propic);
+                    propic.setVisibility(View.VISIBLE);
+
+                    YoYo.with(Techniques.FlipInX)
+                            .duration(700)
+                            .playOn(propic);
+                    if (jsonObject2.getString("description").equals("")) {
+                        desc.setHint("Edit to add a description");
+                        desc.setTextSize(15);
+                    }
+                    desc.setText(jsonObject2.getString("description"));
+                    me.setVisibility(View.VISIBLE);
+
+                    YoYo.with(Techniques.FadeInUp)
+                            .duration(700)
+                            .playOn(about);
+                    YoYo.with(Techniques.FadeInUp)
+                            .duration(700)
+                            .playOn(info);
+                    back.setFocusable(false);
+                    about.setVisibility(View.VISIBLE);
+                    info.setVisibility(View.VISIBLE);
+                    edit.setVisibility(View.VISIBLE);
+                    edit.setFocusable(true);
+                    edit.bringToFront();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String, String> params = new HashMap<>();
+                params.put("userid", uid);
+
+                return params;
+            }
+        };
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        requestQueue = Volley.newRequestQueue(getActivity());
+        requestQueue.add(stringRequest);
+
+
+        posts.setLayoutManager(new GridLayoutManager(getActivity(),3));
+
+
+        StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    Log.i("res", response);
+
+                    JSONObject jsonObject = new JSONObject(response);
+                    JSONArray jsonArray = jsonObject.getJSONArray("posts");
+
+                    if (jsonArray.length() == 0) {
+                        progressBar.setVisibility(View.GONE);
+                        noposts.setVisibility(View.VISIBLE);
+                    }
+
+                    posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.i("success", e.toString());
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("success", error.toString());
+
+            }
+        }
+        ) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String, String> params = new HashMap<>();
+                params.put("userid", uid);
+
+                return params;
+            }
+        };
+        stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        requestQueue.add(stringRequest1);
     }
 
     @Override

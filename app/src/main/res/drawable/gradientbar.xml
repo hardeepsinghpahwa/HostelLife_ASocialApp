@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <gradient android:angle="0"
-        android:startColor="#FFEA00"
-        android:endColor="#FF9100"/>
+        android:startColor="#fbc2eb"
+        android:endColor="#a6c1ee"/>
 </shape>

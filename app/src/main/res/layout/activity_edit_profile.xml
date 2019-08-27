@@ -7,247 +7,242 @@
     tools:context=".EditProfile">
 
     <RelativeLayout
+        android:id="@+id/editprofilelayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:focusable="true"
-        android:id="@+id/editprofilelayout"
-        android:focusableInTouchMode="true"
-        >
+        android:focusableInTouchMode="true">
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:background="#808080"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-
-            <android.support.v7.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="750dp"
-                android:layout_margin="10dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="10dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
 
-                <LinearLayout
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/pp"
                     android:layout_width="match_parent"
-                    android:layout_height="750dp"
-                    android:orientation="vertical"
-                    android:background="@drawable/phoneback"
-                    android:padding="10dp">
+                    android:layout_height="100dp"
+                    app:civ_border_width="5dp"
+                    app:civ_border_color="#FFFFFF"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/propicback" />
 
 
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/pp"
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="10dp"
-                        android:src="@drawable/propicback" />
+                <TextView
+                    android:id="@+id/editprofiletext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:textStyle="bold"
+                    android:text="Edit Profile Picture"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:id="@+id/editprofiletext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#FFFFFF"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="5dp"
-                        android:text="Edit Profile Picture"
-                        android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="30dp"
-                        android:textColor="#FFFFFF"
-                        android:text="Name"
-                        android:textSize="20sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="30dp"
+                    android:textStyle="bold"
+                    android:text="Name"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/editname"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/edittext"
+                    android:inputType="textPersonName"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:singleLine="true" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:textStyle="bold"
+                    android:inputType="textFilter"
+                    android:text="Username"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp">
 
                     <EditText
-                        android:id="@+id/editname"
+                        android:id="@+id/editusername"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:layout_marginTop="5dp"
                         android:background="@drawable/edittext"
-                        android:inputType="textPersonName"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:singleLine="true" />
 
+                    <com.github.ybq.android.spinkit.SpinKitView
+                        android:id="@+id/usernameprogress"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="10dp"
+                        android:visibility="invisible"
+                        style="@style/SpinKitView.Pulse"
+                        app:SpinKit_Color="@color/colorPrimary"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textColor="#FFFFFF"
-                        android:inputType="textFilter"
-                        android:text="Username"
-                        android:textSize="20sp" />
+                </RelativeLayout>
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp">
+                <com.github.ybq.android.spinkit.SpinKitView xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/editprofileprogressbar"
+                    style="@style/SpinKitView.ThreeBounce"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    app:SpinKit_Color="@color/colorPrimary" />
 
-                        <EditText
-                            android:id="@+id/editusername"
-                            android:layout_width="match_parent"
-                            android:layout_height="60dp"
-                            android:background="@drawable/edittext"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
-                            android:singleLine="true" />
+                <TextView
+                    android:id="@+id/inuse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:text="Username already in use"
+                    android:textColor="#FF0000"
+                    android:visibility="gone" />
 
-                        <ProgressBar
-                            android:id="@+id/usernameprogress"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:visibility="invisible" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:textStyle="bold"
+                    android:text="A Line About You"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp" />
 
-                    </RelativeLayout>
+                <EditText
+                    android:id="@+id/editdesc"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/edittext"
+                    android:maxLength="40"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    />
 
-                    <ProgressBar
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:id="@+id/editprofileprogressbar"
-                        android:layout_marginTop="10dp"
-                        />
-
-                    <TextView
-                        android:id="@+id/inuse"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="15dp"
-                        android:text="Username already in use"
-                        android:textColor="#FF0000"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textColor="#FFFFFF"
-                        android:text="Description"
-                        android:textSize="20sp" />
-
-                    <EditText
-                        android:id="@+id/editdesc"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:layout_marginTop="5dp"
-                        android:background="@drawable/edittext"
-                        android:gravity="top"
-                        android:inputType="textMultiLine"
-                        android:maxLines="4"
-                        android:padding="10dp" />
+                <LinearLayout
+                    android:id="@+id/a"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/username"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
 
                     <LinearLayout
-                        android:id="@+id/a"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/username"
-                        android:layout_marginTop="20dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:weightSum="3">
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.8"
+                        android:orientation="vertical">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1.8"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginBottom="5dp"
-                                android:fontFamily="serif"
-                                android:text="Date Of Birth"
-                                android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:id="@+id/editdateofb"
-                                android:layout_width="wrap_content"
-                                android:layout_height="60dp"
-                                android:layout_gravity="center"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:background="@drawable/edittext"
-                                android:editable="false"
-                                android:gravity="center_vertical"
-                                android:hint="DATE OF BIRTH"
-                                android:paddingLeft="20dp"
-                                android:paddingRight="20dp" />
-
-
-                        </LinearLayout>
-
-
-                        <RadioGroup
-                            android:id="@+id/gen"
-                            android:layout_width="0dp"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_weight="1.3"
-                            android:paddingStart="10dp">
+                            android:layout_marginBottom="5dp"
+                            android:text="Date Of Birth"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
-                            <RadioButton
-                                android:id="@+id/editmale"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:buttonTint="#FFFFFF"
-                                android:fontFamily="serif"
-                                android:text="@string/male"
-                                android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                            <RadioButton
-                                android:id="@+id/editfemale"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:buttonTint="#FFFFFF"
-                                android:fontFamily="serif"
-                                android:text="@string/female"
-                                android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                            <RadioButton
-                                android:id="@+id/editother"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:buttonTint="#FFFFFF"
-                                android:fontFamily="serif"
-                                android:text="@string/other"
-                                android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                        </RadioGroup>
+                        <EditText
+                            android:id="@+id/editdateofb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="60dp"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:background="@drawable/edittext"
+                            android:editable="false"
+                            android:fontFamily="@font/bree_serif"
+                            android:gravity="center"
+                            android:hint="DATE OF BIRTH"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp" />
 
 
                     </LinearLayout>
 
+
+                    <RadioGroup
+                        android:id="@+id/gen"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1.3"
+                        android:paddingStart="10dp">
+
+                        <RadioButton
+                            android:id="@+id/editmale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="#FFFFFF"
+                            android:text="@string/male"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <RadioButton
+                            android:id="@+id/editfemale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="#FFFFFF"
+                            android:text="@string/female"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <RadioButton
+                            android:id="@+id/editother"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="#FFFFFF"
+                            android:text="@string/other"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                    </RadioGroup>
                 </LinearLayout>
 
+            </LinearLayout>
 
-            </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginTop="20dp"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="10dp">
 
@@ -262,17 +257,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="More Info"
+                        android:text="Personal Info"
                         android:textSize="30sp"
+                        android:fontFamily="@font/fredoka_one"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
-                        android:textColor="#FFFFFF"
                         android:layout_marginTop="30dp"
                         android:text="Email"
+                        android:textColor="#FFFFFF"
                         android:textSize="20sp" />
 
                     <EditText
@@ -291,9 +287,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="10dp"
-                        android:textColor="#FFFFFF"
                         android:inputType="phone"
                         android:text="Phone"
+                        android:textColor="#FFFFFF"
                         android:textSize="20sp" />
 
                     <EditText

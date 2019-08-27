@@ -40,6 +40,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -88,7 +89,7 @@ public class EditProfile extends AppCompatActivity {
     private int pMonth;
     static final int DATE_DIALOG_ID = 0;
     private int pDay;
-    ProgressBar progressBar1;
+    SpinKitView progressBar1;
     private static final String PROFILE_URL=PhpScripts.PROFILE_URL;
     private static final String USERNAME_CHECK_URL=PhpScripts.USERNAME_CHECK_URL;
     private static final String PROFILE_UPDATE_URL=PhpScripts.PROFILE_UPDATE_URL;
@@ -588,6 +589,7 @@ public class EditProfile extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        overridePendingTransition(R.anim.fadein,R.anim.fadeout);
     }
 
 }

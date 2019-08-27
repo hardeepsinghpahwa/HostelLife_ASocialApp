@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,14 +11,16 @@
     <android.support.design.widget.BottomNavigationView
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
         app:menu="@menu/bottomnav"
         app:itemIconTint="#FFFFFF"
-        android:background="#FF9100"
         app:itemTextColor="#FFFFFF"
+        android:background="@color/colorPrimary"
+        app:itemBackground="@color/colorPrimary"
+        android:foreground="?attr/selectableItemBackground"
         android:id="@+id/bottomnavbar"
         >
 
     </android.support.design.widget.BottomNavigationView>
 
-</RelativeLayout>
+</FrameLayout>

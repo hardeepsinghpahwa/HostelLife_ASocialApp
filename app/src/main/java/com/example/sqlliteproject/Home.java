@@ -10,20 +10,30 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 
+import java.util.HashMap;
+
 public class Home extends AppCompatActivity implements Feed.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener{
 
     BottomNavigationView bottomNavigationView;
     boolean doubleBackToExitPressedOnce = false;
+    Fragment fragment=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        fragment=new Feed();
+        FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.layout,fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
 
         ServiceManager serviceManager = new ServiceManager(getApplicationContext());
         if (!serviceManager.isNetworkAvailable()) {
@@ -35,12 +45,13 @@ public class Home extends AppCompatActivity implements Feed.OnFragmentInteractio
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                Fragment fragment;
+
                 switch (menuItem.getItemId()) {
                     case R.id.feed:
                         fragment=new Feed();
                         loadfragment(fragment);
                         return true;
+
                     case R.id.profile:
                         fragment=new Profile();
                         loadfragment(fragment);
@@ -55,6 +66,7 @@ public class Home extends AppCompatActivity implements Feed.OnFragmentInteractio
     void loadfragment(Fragment fragment)
     {
         FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(R.anim.fadein,R.anim.fadeout);
         fragmentTransaction.replace(R.id.layout,fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
@@ -68,11 +80,7 @@ public class Home extends AppCompatActivity implements Feed.OnFragmentInteractio
     @Override
     protected void onResume() {
         super.onResume();
-        Fragment fragment=new Feed();
-        FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.layout,fragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+
     }
 
     @Override
