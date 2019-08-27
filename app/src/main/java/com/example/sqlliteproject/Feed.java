@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v4.widget.NestedScrollView;
@@ -38,9 +39,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
@@ -79,6 +82,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.supercharge.shimmerlayout.ShimmerLayout;
 
 public class Feed extends Fragment {
 
@@ -111,7 +115,7 @@ public class Feed extends Fragment {
 
     //=
     RecyclerView recyclerView;
-    ShimmerFrameLayout shimmerFrameLayout;
+    ShimmerLayout shimmerFrameLayout;
     String profilepic;
     TextView noposts;
     String json;
@@ -320,7 +324,7 @@ public class Feed extends Fragment {
 
         mCameraSource = new CameraSource.Builder(context, detector)
                 .setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setFacing(CameraSource.CAMERA_FACING_FRONT)
                 .setRequestedFps(30.0f)
                 .build();
     }
@@ -391,42 +395,6 @@ public class Feed extends Fragment {
             e.printStackTrace();
         }
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, SHOW_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    Log.i("res", response);
-
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject.getJSONArray("posts");
-
-                    recyclerView.setAdapter(new AdapterClass(jsonArray, userid, getActivity()));
-
-                    if (jsonArray.length() == 0) {
-                        progressBar.setVisibility(View.GONE);
-                        noposts.setVisibility(View.VISIBLE);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.i("success", e.toString());
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("success", error.toString());
-
-            }
-        });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-        requestQueue.add(stringRequest);
-
 
         add = v.findViewById(R.id.addpost);
         add.setOnClickListener(new View.OnClickListener() {
@@ -444,19 +412,15 @@ public class Feed extends Fragment {
         linearLayoutManager = ((LinearLayoutManager)recyclerView.getLayoutManager());
         final int firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition();
 
+        ViewCompat.setNestedScrollingEnabled(recyclerView, false);
+
+
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, final int position) {
                 posi.setText(String.valueOf(position));
                 pos=position;
-
-                View v=linearLayoutManager.findViewByPosition(pos);
-                Log.i("pos", String.valueOf(pos));
-
-                SparkButton sparkButton=v.findViewById(R.id.like);
-
-                Log.i("check", String.valueOf(sparkButton.isChecked()));
 
                 posi.addTextChangedListener(new TextWatcher() {
                     @Override
@@ -594,7 +558,7 @@ public class Feed extends Fragment {
     class AdapterClass extends RecyclerView.Adapter<AdapterClass.ViewHolderClass> {
         JSONArray jsonArray;
         String uid;
-        RequestQueue requestQueue;
+        RequestQueue requestQueue,requestQueue2;
         Context context;
         String pid, likepid;
         int pos = 0;
@@ -633,6 +597,17 @@ public class Feed extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull final AdapterClass.ViewHolderClass viewHolderClass, final int i) {
 
+
+            viewHolderClass.linearLayout.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    viewHolderClass.commenttext.clearFocus();
+                    return false;
+
+                }
+            });
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -698,7 +673,7 @@ public class Feed extends Fragment {
                         30000,
                         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                requestQueue = Volley.newRequestQueue(context);
+                requestQueue = Volley.newRequestQueue(getActivity());
                 requestQueue.add(stringRequest2);
 
 
@@ -746,20 +721,6 @@ public class Feed extends Fragment {
                             .into(viewHolderClass.postpic);
 
 
-                    viewHolderClass.postcomment.setVisibility(View.VISIBLE);
-                    YoYo.with(Techniques.RollIn)
-                            .duration(700)
-                            .playOn(viewHolderClass.postcomment);
-
-                    viewHolderClass.like.setVisibility(View.VISIBLE);
-                    YoYo.with(Techniques.RollIn)
-                            .duration(700)
-                            .playOn(viewHolderClass.like);
-                    viewHolderClass.comment.setVisibility(View.VISIBLE);
-                    YoYo.with(Techniques.RollIn)
-                            .duration(700)
-                            .playOn(viewHolderClass.comment);
-                    viewHolderClass.commenttext.setVisibility(View.VISIBLE);
 
                     Log.i("u", desc);
 
@@ -799,6 +760,20 @@ public class Feed extends Fragment {
                                     viewHolderClass.like.setChecked(true);
                                 }
 
+                                viewHolderClass.postcomment.setVisibility(View.VISIBLE);
+                                YoYo.with(Techniques.RollIn)
+                                        .duration(700)
+                                        .playOn(viewHolderClass.postcomment);
+
+                                viewHolderClass.like.setVisibility(View.VISIBLE);
+                                YoYo.with(Techniques.RollIn)
+                                        .duration(700)
+                                        .playOn(viewHolderClass.like);
+                                viewHolderClass.comment.setVisibility(View.VISIBLE);
+                                YoYo.with(Techniques.RollIn)
+                                        .duration(700)
+                                        .playOn(viewHolderClass.comment);
+                                viewHolderClass.commenttext.setVisibility(View.VISIBLE);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -835,7 +810,8 @@ public class Feed extends Fragment {
                             30000,
                             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                             DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    requestQueue.add(stringRequest1);
+                    requestQueue2=Volley.newRequestQueue(getActivity());
+                    requestQueue2.add(stringRequest1);
 
 
                 } catch (ParseException e) {
@@ -937,13 +913,7 @@ public class Feed extends Fragment {
                                     params.put("post_id", pid);
                                     if (!viewHolderClass.commenttext.getText().toString().equals("")) {
                                         params.put("comment", viewHolderClass.commenttext.getText().toString());
-                                    } else {
-                                        Toast toast = Toast.makeText(context, "Empty Comment", Toast.LENGTH_SHORT);
-                                        View view = toast.getView();
-                                        view.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                                        TextView text = (TextView) view.findViewById(android.R.id.message);
-                                        text.setTextColor(getActivity().getColor(R.color.colorPrimary));
-                                        toast.show();                                    }
+                                    }
                                     return params;
                                 }
                             };
@@ -1001,6 +971,9 @@ public class Feed extends Fragment {
                             e.printStackTrace();
                         }
                         if (buttonState) {
+
+
+
                             viewHolderClass.like.setClickable(false);
                             viewHolderClass.like.setEnabled(false);
 
@@ -1055,6 +1028,10 @@ public class Feed extends Fragment {
                             requestQueue.add(stringRequest);
 
                         } else {
+                            YoYo.with(Techniques.Landing)
+                                    .duration(700)
+                                    .playOn(viewHolderClass.like);
+
                             viewHolderClass.like.setClickable(false);
                             viewHolderClass.like.setEnabled(false);
 
@@ -1148,6 +1125,7 @@ public class Feed extends Fragment {
             ImageButton comment;
             SparkButton like;
             String no;
+            LinearLayout linearLayout;
             SpinKitView spin;
 
             public ViewHolderClass(@NonNull View itemView) {
@@ -1166,6 +1144,7 @@ public class Feed extends Fragment {
                 postcomment = itemView.findViewById(R.id.postcomment);
                 propic2 = itemView.findViewById(R.id.propic2);
                 spin=itemView.findViewById(R.id.commentspin);
+                linearLayout=itemView.findViewById(R.id.layout1);
             }
         }
 
