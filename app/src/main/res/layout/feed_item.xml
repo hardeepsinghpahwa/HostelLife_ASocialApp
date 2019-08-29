@@ -4,6 +4,8 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#FFFFFF"
+    android:focusableInTouchMode="true"
+    android:id="@+id/layout1"
     android:orientation="vertical">
 
     <LinearLayout
@@ -17,10 +19,11 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/propic"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginLeft="5dp"
             android:scaleType="centerCrop"
+            android:layout_gravity="center"
             android:background="@drawable/oval"
             app:civ_border_color="@color/colorPrimary"
             app:civ_border_width="3dp" />
@@ -30,25 +33,25 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:textColor="#000"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_weight="9.1"
-            android:fontFamily="@font/open_sans"
             android:gravity="left"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:textSize="15sp"
+            />
 
         <ImageView
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="30dp"
             android:src="@drawable/threedots"
             android:layout_weight="0.8"
-            android:layout_gravity="end"
+            android:layout_gravity="center"
             />
 
     </LinearLayout>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardElevation="10dp"
@@ -59,17 +62,19 @@
             android:layout_width="match_parent"
             android:layout_height="410dp"
             android:focusable="true"
+            android:minHeight="300dp"
+            android:maxHeight="410dp"
             android:background="#f3f3f3"
             android:focusableInTouchMode="true"
             android:scaleType="matrix"
             />
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:orientation="horizontal"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -78,15 +83,19 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:focusableInTouchMode="true"
+            android:focusable="true"
             android:layout_weight="1">
 
             <com.varunest.sparkbutton.SparkButton
                 android:id="@+id/like"
-                android:layout_width="60dp"
+                android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="10dp"
                 app:sparkbutton_activeImage="@drawable/favourite"
-                app:sparkbutton_iconSize="40dp"
+                app:sparkbutton_iconSize="35dp"
+                android:focusable="false"
+                android:layout_gravity="center"
                 android:visibility="invisible"
                 app:sparkbutton_inActiveImage="@drawable/notfav"
                 app:sparkbutton_primaryColor="@color/red"
@@ -98,25 +107,28 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:textStyle="bold"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="5dp"
                 android:gravity="left"
+                android:textColor="#000"
                 android:id="@+id/likesno"
-                android:textSize="15sp" />
+                android:textSize="13sp" />
 
         </LinearLayout>
 
 
         <LinearLayout
             android:layout_width="0dp"
+            android:focusable="true"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
             <ImageButton
-                android:layout_width="40dp"
-                android:layout_height="35dp"
+                android:layout_width="35dp"
+                android:layout_height="30dp"
                 android:id="@+id/comment"
                 android:scaleType="centerCrop"
                 android:layout_gravity="center"
+                android:focusable="false"
                 android:layout_marginStart="10dp"
                 android:background="#FFFFFF"
                 android:visibility="invisible"
@@ -128,10 +140,11 @@
                 android:textStyle="bold"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginStart="20dp"
+                android:textColor="#000"
+                android:layout_marginStart="10dp"
                 android:singleLine="true"
                 android:id="@+id/commentsno"
-                android:textSize="15sp" />
+                android:textSize="13sp" />
 
         </LinearLayout>
     </LinearLayout>
@@ -145,7 +158,7 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp"
-        android:textSize="15sp"
+        android:textSize="13sp"
         />
 
     <LinearLayout
@@ -187,6 +200,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:focusable="false"
                 android:id="@+id/postcomment"
                 android:visibility="invisible"
                 android:src="@drawable/send"
@@ -216,19 +230,21 @@
         <TextView
             android:id="@+id/posttime"
             android:layout_width="wrap_content"
+            android:textColor="#000"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:textSize="13sp"
+            android:textSize="11sp"
             />
 
         <TextView
             android:id="@+id/postlocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
+            android:textColor="#000"
+            android:textSize="11sp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="10dp"
-             />
+            />
     </RelativeLayout>
 
 

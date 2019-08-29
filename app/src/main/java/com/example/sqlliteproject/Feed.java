@@ -5,35 +5,35 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import
-        android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
-import android.support.v4.view.animation.LinearOutSlowInInterpolator;
-import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+
+import com.daasuu.bl.BubbleLayout;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.core.view.ViewCompat;
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+import androidx.core.widget.NestedScrollView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.transition.Fade;
-import android.transition.TransitionManager;
-import android.transition.TransitionSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -68,21 +68,25 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.transitionseverywhere.extra.Scale;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.varunest.sparkbutton.SparkButton;
 import com.varunest.sparkbutton.SparkEventListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.File;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.supercharge.shimmerlayout.ShimmerLayout;
+import dmax.dialog.SpotsDialog;
 
 public class Feed extends Fragment {
 
@@ -93,10 +97,16 @@ public class Feed extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private final int RESULT_CROP = 400;
     FaceGraphic mFaceGraphic;
+    String downloadlink;
+    String uri,posttext,loc;
+    RequestQueue requestqueue2;
     String username;
     boolean alreadyexecuted = false;
     Float va;
+    NestedScrollView nestedScrollView;
     int pos=0;
+    BubbleLayout posting;
+    SpinKitView spinKitView;
     SparkButton sparkButton;
     NestedScrollView scrollView;
     private String mParam1;
@@ -115,7 +125,7 @@ public class Feed extends Fragment {
 
     //=
     RecyclerView recyclerView;
-    ShimmerLayout shimmerFrameLayout;
+    ShimmerFrameLayout shimmerFrameLayout;
     String profilepic;
     TextView noposts;
     String json;
@@ -153,6 +163,7 @@ public class Feed extends Fragment {
             Log.d(TAG, "Camera permission granted - initialize the camera source");
             // we have permission, so create the camerasource
             createCameraSource();
+            startCameraSource();
             return;
         }
 
@@ -211,65 +222,6 @@ public class Feed extends Fragment {
         super.onResume();
         startCameraSource();
         alreadyexecuted = false;
-        if (getActivity().getIntent().getStringExtra("json") == null) {
-            SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
-
-            json = shared.getString("json", "");
-
-        } else {
-            json = getActivity().getIntent().getStringExtra("json");
-        }
-
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(json);
-            username = jsonObject.getString("username");
-            profilepic = jsonObject.getString("image");
-            userid = jsonObject.getString("uid");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        Log.i("uname", userid);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, SHOW_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    Log.i("res", response);
-
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject.getJSONArray("posts");
-
-                    recyclerView.setAdapter(new AdapterClass(jsonArray, userid, getActivity()));
-
-                    if (jsonArray.length() == 0) {
-                        progressBar.setVisibility(View.GONE);
-                        noposts.setVisibility(View.VISIBLE);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.i("success", e.toString());
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("success", error.toString());
-
-            }
-        });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-        requestQueue.add(stringRequest);
-
     }
 
     private void requestCameraPermission() {
@@ -298,6 +250,70 @@ public class Feed extends Fragment {
                 .show();
     }
 
+    private void loadposts()
+    {
+        if (getActivity().getIntent().getStringExtra("json") == null) {
+            SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
+
+            json = shared.getString("json", "");
+
+        } else {
+            json = getActivity().getIntent().getStringExtra("json");
+        }
+
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json);
+            username = jsonObject.getString("username");
+            profilepic = jsonObject.getString("image");
+            userid = jsonObject.getString("uid");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                // a potentially time consuming task
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, SHOW_URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject.getJSONArray("posts");
+
+                            recyclerView.setAdapter(new AdapterClass(jsonArray, userid, getActivity()));
+
+                            if (jsonArray.length() == 0) {
+                                progressBar.setVisibility(View.GONE);
+                                noposts.setVisibility(View.VISIBLE);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+                stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                        30000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
+                requestQueue.add(stringRequest);
+
+            }
+        });
+    }
 
     private void createCameraSource() {
 
@@ -340,14 +356,29 @@ public class Feed extends Fragment {
         recyclerView = v.findViewById(R.id.postsrecyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         progressBar = v.findViewById(R.id.feedprogressbar);
-        scrollView = v.findViewById(R.id.scrollview);
+        scrollView = v.findViewById(R.id.nestedscrollview);
         noposts = v.findViewById(R.id.feednoposts);
         toolbar = v.findViewById(R.id.toolbar);
         scrollView.setSmoothScrollingEnabled(true);
         scrollView.smoothScrollTo(6, 6);
         shimmerFrameLayout=v.findViewById(R.id.shimmer_view_container);
         posi=v.findViewById(R.id.posi);
+        spinKitView=v.findViewById(R.id.postspin);
+        recyclerView.setFocusable(false);
+        recyclerView.setHasFixedSize(false);
+        recyclerView.setItemViewCacheSize(10);
+        scrollView.setSmoothScrollingEnabled(true);
+        scrollView.smoothScrollTo(4,4);
+        posting=v.findViewById(R.id.postbubble);
 
+        loadposts();
+
+        AnimationDrawable animationDrawable = (AnimationDrawable) toolbar.getBackground();
+
+        animationDrawable.setEnterFadeDuration(2500);
+        animationDrawable.setExitFadeDuration(5000);
+
+        animationDrawable.start();
 
         mPreview =  v.findViewById(R.id.preview);
         mGraphicOverlay =  v.findViewById(R.id.faceOverlay);
@@ -361,7 +392,7 @@ public class Feed extends Fragment {
             requestCameraPermission();
         }
 
-        shimmerFrameLayout.startShimmerAnimation();
+        shimmerFrameLayout.startShimmer();
         ((AppCompatActivity) (getActivity())).setSupportActionBar(toolbar);
         ServiceManager serviceManager = new ServiceManager(getActivity());
         if (!serviceManager.isNetworkAvailable()) {
@@ -389,7 +420,6 @@ public class Feed extends Fragment {
             userid = jsonObject.getString("uid");
 
 
-            Log.i("uname", userid);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -401,10 +431,9 @@ public class Feed extends Fragment {
             @Override
             public void onClick(View v) {
 
+
                 Intent i = new Intent(getActivity(), NewPost.class);
-                i.putExtra("userid", userid);
-                i.putExtra("pp", profilepic);
-                startActivity(i);
+                startActivityForResult(i,123);
 
 
             }
@@ -448,6 +477,147 @@ public class Feed extends Fragment {
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        StorageReference storageReference;
+        final String NEW_URL = PhpScripts.NEW_URL;
+        Uri resulturi = null;
+        if (requestCode == 123) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Get the result from the returned Intent
+                uri = data.getStringExtra("uri");
+                posttext = data.getStringExtra("posttext");
+                loc = data.getStringExtra("loc");
+                resulturi = Uri.parse(uri);
+
+                YoYo.with(Techniques.FadeIn)
+                        .duration(700)
+                        .playOn(posting);
+
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            posting.setVisibility(View.VISIBLE);
+                            Thread.sleep(5000);
+
+                        } catch (InterruptedException e) {
+                        }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                YoYo.with(Techniques.FadeOut)
+                                        .duration(700)
+                                        .playOn(posting);
+                            }
+                        });
+                    }
+                };
+                thread.start();
+                storageReference = FirebaseStorage.getInstance().getReference();
+
+                spinKitView.setVisibility(View.VISIBLE);
+                add.setVisibility(View.INVISIBLE);
+                storageReference = storageReference.child("Saved Images/" + UUID.randomUUID().toString() + ".jpg");
+                UploadTask uploadTask = storageReference.putFile(resulturi);
+                final StorageReference finalStorageReference = storageReference;
+                Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            spinKitView.setVisibility(View.GONE);
+                            add.setVisibility(View.VISIBLE);
+                            throw task.getException();
+                        }
+
+                        // Continue with the task to get the download URL
+                        return finalStorageReference.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull final Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            downloadlink = task.getResult().toString();
+                            StringRequest stringRequest = new StringRequest(Request.Method.POST, NEW_URL, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    JSONObject jsonObject = null;
+                                    try {
+                                        jsonObject = new JSONObject(response);
+                                        String success = jsonObject.getString("success");
+
+                                        if (success.equals("1")) {
+                                            Toast.makeText(getActivity(), "Posted", Toast.LENGTH_SHORT).show();
+                                            spinKitView.setVisibility(View.GONE);
+                                            add.setVisibility(View.VISIBLE);
+                                            loadposts();
+
+                                        } else {
+                                            Log.i("error", "success=0");
+                                            Toast.makeText(getActivity(), "Error Posting Image, success=0", Toast.LENGTH_SHORT).show();
+                                            spinKitView.setVisibility(View.GONE);
+                                            add.setVisibility(View.VISIBLE);
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.i("error", error.toString());
+                                    Toast.makeText(getActivity(), "Error Posting Image", Toast.LENGTH_SHORT).show();
+                                }
+                            }) {
+                                @Override
+                                protected Map<String, String> getParams() throws AuthFailureError {
+                                    String u = UUID.randomUUID().toString();
+
+                                    Log.i("link", downloadlink);
+
+                                    Map<String, String> params = new HashMap<>();
+                                    params.put("image", downloadlink);
+                                    params.put("uid", u);
+                                    params.put("userid", userid);
+                                    params.put("description", posttext);
+                                    params.put("location", loc);
+
+                                    return params;
+                                }
+                            };
+
+                            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                    30000,
+                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+
+                            requestqueue2 = Volley.newRequestQueue(getActivity());
+                            requestqueue2.add(stringRequest);
+
+
+                        }
+                    }
+                });
+
+
+
+
+
+
+
+
+            } else {
+                // AnotherActivity was not successful. No data to retrieve.
+        }
+
         }
     }
 
@@ -507,7 +677,6 @@ public class Feed extends Fragment {
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
             View v=linearLayoutManager.findViewByPosition(pos);
-            Log.i("pos", String.valueOf(pos));
 
             sparkButton=v.findViewById(R.id.like);
 
@@ -516,7 +685,6 @@ public class Feed extends Fragment {
             va=mFaceGraphic.smileval();
 
 
-            Log.i("check", String.valueOf(sparkButton.isChecked()));
             if(!sparkButton.isChecked() && va>0.5)
             {
                 getActivity().runOnUiThread(new Runnable() {
@@ -579,9 +747,7 @@ public class Feed extends Fragment {
         @Override
         public void onViewAttachedToWindow(@NonNull ViewHolderClass holder) {
             super.onViewAttachedToWindow(holder);
-            shimmerFrameLayout.stopShimmerAnimation();
-            shimmerFrameLayout.setVisibility(View.GONE);
-            if (!alreadyexecuted) {
+           if (!alreadyexecuted) {
                 recyclerView.smoothScrollToPosition(pos);
                 alreadyexecuted = true;
             }
@@ -625,198 +791,213 @@ public class Feed extends Fragment {
 
                 final JSONObject object = jsonArray.getJSONObject(i);
 
-                Log.i("posts", object.toString());
-
-                String time = object.getString("date");
-                String img = object.getString("image");
-                String desc = object.getString("description");
-                String loc = object.getString("location");
-                String likes = object.getString("likes");
-                String comments = object.getString("comments");
+                final String time = object.getString("date");
+                final String img = object.getString("image");
+                final String desc = object.getString("description");
+                final String loc = object.getString("location");
+                final String likes = object.getString("likes");
+                final String comments = object.getString("comments");
                 final String userid1 = object.getString("userid");
-                String num = String.valueOf(object.getInt("number"));
-
-                StringRequest stringRequest2 = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonObject1 = new JSONObject(response);
-                            JSONArray jsonArray = jsonObject1.getJSONArray("details");
-                            JSONObject jsonObject2 = jsonArray.getJSONObject(0);
-
-                            viewHolderClass.username.setText(jsonObject2.getString("username"));
-
-                            Glide.with(context).load(jsonObject2.getString("image")).diskCacheStrategy(DiskCacheStrategy.ALL).override(200, 200).into(viewHolderClass.propic);
-
-                            Glide.with(context).load(jsonObject2.getString("image")).diskCacheStrategy(DiskCacheStrategy.ALL).override(100, 100).into(viewHolderClass.propic2);
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-
-                        Map<String, String> params = new HashMap<>();
-                        params.put("userid", userid1);
-
-                        return params;
-                    }
-                };
-                stringRequest2.setRetryPolicy(new DefaultRetryPolicy(
-                        30000,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                final String num = String.valueOf(object.getInt("number"));
                 requestQueue = Volley.newRequestQueue(getActivity());
-                requestQueue.add(stringRequest2);
+
+                new Thread(new Runnable() {
+                    public void run() {
+
+                        StringRequest stringRequest1 = new StringRequest(Request.Method.POST, CHECK_URL, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                JSONObject jsonObject = null;
+
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    final String success = jsonObject.getString("success");
+
+                                    if (success.equals("1")) {
+                                        viewHolderClass.like.setChecked(true);
+                                    }
+
+                                    new Thread(new Runnable(){
+                                        public void run() {
+                                            StringRequest stringRequest2 = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+                                                @Override
+                                                public void onResponse(String response) {
+
+                                                    try {
+                                                        JSONObject jsonObject1 = new JSONObject(response);
+                                                        JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                                                        JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+
+                                                        viewHolderClass.username.setText(jsonObject2.getString("username"));
+
+                                                        Glide.with(context).load(jsonObject2.getString("image")).diskCacheStrategy(DiskCacheStrategy.ALL).override(200, 200).into(viewHolderClass.propic);
+
+                                                        Glide.with(context).load(jsonObject2.getString("image")).diskCacheStrategy(DiskCacheStrategy.ALL).override(100, 100).into(viewHolderClass.propic2);
 
 
-                String dateStart = time;
+                                                        viewHolderClass.postcomment.setVisibility(View.VISIBLE);
+                            /*YoYo.with(Techniques.RollIn)
+                                    .duration(700)
+                                    .playOn(viewHolderClass.postcomment);
 
-                //HH converts hour in 24 hours format (0-23), day calculation
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = new Date();
-
-                Date d1 = null;
-                Date d2 = null;
-
-                try {
-                    d1 = format.parse(dateStart);
-                    d2 = format.parse(formatter.format(date));
-
-                    //in milliseconds
-                    long diff = d2.getTime() - d1.getTime();
-
-                    long diffSeconds = diff / 1000 % 60;
-                    long diffMinutes = diff / (60 * 1000) % 60;
-                    long diffHours = diff / (60 * 60 * 1000) % 24;
-                    long diffDays = diff / (24 * 60 * 60 * 1000);
-
-                    if (diffDays > 1) {
-                        viewHolderClass.time.setText(diffDays + " days");
-                    } else if (diffDays == 1) {
-                        viewHolderClass.time.setText(diffDays + " day");
-                    } else if (diffHours > 1) {
-                        viewHolderClass.time.setText(diffHours + " hours ago");
-                    } else if (diffHours == 1) {
-                        viewHolderClass.time.setText(diffHours + " hour ago");
-                    } else if (diffMinutes > 1) {
-                        viewHolderClass.time.setText(diffMinutes + " minutes ago");
-                    } else if (diffMinutes == 1) {
-                        viewHolderClass.time.setText(diffMinutes + " minute ago");
-                    } else if (diffSeconds > 1) {
-                        viewHolderClass.time.setText(diffSeconds + " seconds ago");
-                    } else if (diffDays == 1) {
-                        viewHolderClass.time.setText(diffSeconds + " second ago");
-                    }
-
-                    Glide.with(getActivity()).load(img).diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(viewHolderClass.postpic);
+                            YoYo.with(Techniques.RollIn)
+                                    .duration(700)
+                                    .playOn(viewHolderClass.like);
+                            YoYo.with(Techniques.RollIn)
+                                    .duration(700)
+                                    .playOn(viewHolderClass.comment);*/
+                                                        viewHolderClass.like.setVisibility(View.VISIBLE);
+                                                        viewHolderClass.comment.setVisibility(View.VISIBLE);
+                                                        viewHolderClass.commenttext.setVisibility(View.VISIBLE);
 
 
+                                                        String dateStart = time;
 
-                    Log.i("u", desc);
+                                                        //HH converts hour in 24 hours format (0-23), day calculation
+                                                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                                        Date date = new Date();
 
-                    if (desc.equals("")) {
-                        viewHolderClass.description.setVisibility(View.GONE);
-                    }
-                    viewHolderClass.description.setText(desc);
-                    viewHolderClass.location.setText(loc);
-                    viewHolderClass.no = num;
+                                                        Date d1 = null;
+                                                        Date d2 = null;
 
-                    if ((Integer.parseInt(likes) > 1)) {
-                        viewHolderClass.likes.setText(likes + " likes");
-                    } else {
-                        viewHolderClass.likes.setText(likes + " like");
-                    }
+                                                        try {
+                                                            d1 = format.parse(dateStart);
+                                                            d2 = format.parse(formatter.format(date));
 
-                    if ((Integer.parseInt(comments) > 1)) {
-                        viewHolderClass.comments.setText(comments + " comments");
-                    } else {
-                        viewHolderClass.comments.setText(comments + " comment");
-                    }
+                                                            //in milliseconds
+                                                            long diff = d2.getTime() - d1.getTime();
 
-                    //Picasso.get().load(img).resize(500,500).into(viewHolderClass.postpic);
+                                                            long diffSeconds = diff / 1000 % 60;
+                                                            long diffMinutes = diff / (60 * 1000) % 60;
+                                                            long diffHours = diff / (60 * 60 * 1000) % 24;
+                                                            long diffDays = diff / (24 * 60 * 60 * 1000);
+
+                                                            if (diffDays > 1) {
+                                                                viewHolderClass.time.setText(diffDays + " days");
+                                                            } else if (diffDays == 1) {
+                                                                viewHolderClass.time.setText(diffDays + " day");
+                                                            } else if (diffHours > 1) {
+                                                                viewHolderClass.time.setText(diffHours + " hours ago");
+                                                            } else if (diffHours == 1) {
+                                                                viewHolderClass.time.setText(diffHours + " hour ago");
+                                                            } else if (diffMinutes > 1) {
+                                                                viewHolderClass.time.setText(diffMinutes + " minutes ago");
+                                                            } else if (diffMinutes == 1) {
+                                                                viewHolderClass.time.setText(diffMinutes + " minute ago");
+                                                            } else if (diffSeconds > 1) {
+                                                                viewHolderClass.time.setText(diffSeconds + " seconds ago");
+                                                            } else if (diffDays == 1) {
+                                                                viewHolderClass.time.setText(diffSeconds + " second ago");
+                                                            }
+
+                                                            Glide.with(getActivity()).load(img).diskCacheStrategy(DiskCacheStrategy.ALL)
+                                                                    .into(viewHolderClass.postpic);
+
+
+                                                            if (desc.equals("")) {
+                                                                viewHolderClass.description.setVisibility(View.GONE);
+                                                            }
+                                                            viewHolderClass.description.setText(desc);
+                                                            viewHolderClass.location.setText(loc);
+                                                            viewHolderClass.no = num;
+
+                                                            if ((Integer.parseInt(likes) > 1)) {
+                                                                viewHolderClass.likes.setText(likes + " likes");
+                                                            } else {
+                                                                viewHolderClass.likes.setText(likes + " like");
+                                                            }
+
+                                                            if ((Integer.parseInt(comments) > 1)) {
+                                                                viewHolderClass.comments.setText(comments + " comments");
+                                                            } else {
+                                                                viewHolderClass.comments.setText(comments + " comment");
+                                                            }
+
+                                                            //Picasso.get().load(img).resize(500,500).into(viewHolderClass.postpic);
+
+                                                            shimmerFrameLayout.stopShimmer();
+                                                            shimmerFrameLayout.setVisibility(View.GONE);
+
+                                                        } catch (ParseException e) {
+                                                            e.printStackTrace();
+                                                        }
+
+
+                                                    } catch (JSONException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }, new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+
+                                                }
+                                            }) {
+                                                @Override
+                                                protected Map<String, String> getParams() throws AuthFailureError {
+
+                                                    Map<String, String> params = new HashMap<>();
+                                                    params.put("userid", userid1);
+
+                                                    return params;
+                                                }
+                                            };
+                                            stringRequest2.setRetryPolicy(new DefaultRetryPolicy(
+                                                    30000,
+                                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                                            requestQueue.add(stringRequest2);
+
+                                        }
+                                        }).start();
 
 
 
-                    StringRequest stringRequest1 = new StringRequest(Request.Method.POST, CHECK_URL, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            JSONObject jsonObject = null;
 
-                            try {
-                                jsonObject = new JSONObject(response);
-                                final String success = jsonObject.getString("success");
-
-                                if (success.equals("1")) {
-                                    viewHolderClass.like.setChecked(true);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
 
-                                viewHolderClass.postcomment.setVisibility(View.VISIBLE);
-                                YoYo.with(Techniques.RollIn)
-                                        .duration(700)
-                                        .playOn(viewHolderClass.postcomment);
 
-                                viewHolderClass.like.setVisibility(View.VISIBLE);
-                                YoYo.with(Techniques.RollIn)
-                                        .duration(700)
-                                        .playOn(viewHolderClass.like);
-                                viewHolderClass.comment.setVisibility(View.VISIBLE);
-                                YoYo.with(Techniques.RollIn)
-                                        .duration(700)
-                                        .playOn(viewHolderClass.comment);
-                                viewHolderClass.commenttext.setVisibility(View.VISIBLE);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
 
-
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-
-                        }
-                    }) {
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            try {
-                                JSONObject o = jsonArray.getJSONObject(i);
-                                likepid = o.getString("uid");
-
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
-
-                            Map<String, String> params = new HashMap<>();
-                            params.put("pid", likepid);
-                            params.put("uid", uid);
-
-
-                            return params;
-                        }
-                    };
-                    stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
-                            30000,
-                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    requestQueue2=Volley.newRequestQueue(getActivity());
-                    requestQueue2.add(stringRequest1);
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                try {
+                                    JSONObject o = jsonArray.getJSONObject(i);
+                                    likepid = o.getString("uid");
 
 
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                                Map<String, String> params = new HashMap<>();
+                                params.put("pid", likepid);
+                                params.put("uid", uid);
+
+
+                                return params;
+                            }
+                        };
+                        stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                                30000,
+                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                        //requestQueue2=Volley.newRequestQueue(getActivity());
+                        requestQueue.add(stringRequest1);
+
+                    }
+                }).start();
+
+
+
 
                 viewHolderClass.username.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -845,11 +1026,8 @@ public class Feed extends Fragment {
                         if (viewHolderClass.commenttext.getText().toString().equals("")) {
 
                             Toast toast = Toast.makeText(context, "Empty Comment", Toast.LENGTH_SHORT);
-                            View view = toast.getView();
-                            view.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                            TextView text = (TextView) view.findViewById(android.R.id.message);
-                            text.setTextColor(getActivity().getColor(R.color.colorPrimary));
                             toast.show();
+                            viewHolderClass.commenttext.clearFocus();
 
                         } else {
 
@@ -859,69 +1037,68 @@ public class Feed extends Fragment {
                             try {
                                 JSONObject object = jsonArray.getJSONObject(i);
                                 pid = object.getString("uid");
-                                Log.i("pid", pid);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+                            new Thread(new Runnable() {
+                                public void run() {
+                                    // a potentially time consuming task
+                                    StringRequest request = new StringRequest(Request.Method.POST, COMMENT_URL, new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            JSONObject jsonObject1 = null;
+                                            try {
+                                                jsonObject1 = new JSONObject(response);
+                                                String commentz = jsonObject1.getString("comments");
+                                                String success = jsonObject1.getString("success");
 
-                            StringRequest request = new StringRequest(Request.Method.POST, COMMENT_URL, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    JSONObject jsonObject1 = null;
-                                    try {
-                                        jsonObject1 = new JSONObject(response);
-                                        String commentz = jsonObject1.getString("comments");
-                                        String success = jsonObject1.getString("success");
+                                                if (success.equals("1")) {
 
-                                        if (success.equals("1")) {
+                                                    Toast toast = Toast.makeText(context, "Comment Posted", Toast.LENGTH_SHORT);
+                                                    toast.show();
+                                                    viewHolderClass.commenttext.clearFocus();
+                                                    viewHolderClass.postcomment.setVisibility(View.VISIBLE);
+                                                    viewHolderClass.spin.setVisibility(View.GONE);
+                                                }
 
-                                            Toast toast = Toast.makeText(context, "Commemnt Posted", Toast.LENGTH_SHORT);
-                                            View view = toast.getView();
-                                            view.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                                            TextView text = (TextView) view.findViewById(android.R.id.message);
-                                            text.setTextColor(getActivity().getColor(R.color.colorPrimary));
-                                            toast.show();
-                                            viewHolderClass.postcomment.setVisibility(View.VISIBLE);
-                                            viewHolderClass.spin.setVisibility(View.GONE);
+                                                if ((Integer.parseInt(commentz) > 1)) {
+                                                    viewHolderClass.commenttext.setText("");
+                                                    viewHolderClass.comments.setText(commentz + " comments");
+                                                } else {
+                                                    viewHolderClass.comments.setText(commentz + " comment");
+                                                    viewHolderClass.commenttext.setText("");
+                                                }
+
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
+                                    }, new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
 
-                                        if ((Integer.parseInt(commentz) > 1)) {
-                                            viewHolderClass.commenttext.setText("");
-                                            viewHolderClass.commenttext.setFocusable(false);
-                                            viewHolderClass.comments.setText(commentz + " comments");
-                                        } else {
-                                            viewHolderClass.comments.setText(commentz + " comment");
-                                            viewHolderClass.commenttext.setText("");
-                                            viewHolderClass.commenttext.setFocusable(false);
                                         }
+                                    }) {
+                                        @Override
+                                        protected Map<String, String> getParams() throws AuthFailureError {
+                                            Map<String, String> params = new HashMap<>();
 
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
+                                            params.put("user_id", uid);
+                                            params.put("post_id", pid);
+                                            if (!viewHolderClass.commenttext.getText().toString().equals("")) {
+                                                params.put("comment", viewHolderClass.commenttext.getText().toString());
+                                            }
+                                            return params;
+                                        }
+                                    };
+                                    request.setRetryPolicy(new DefaultRetryPolicy(
+                                            30000,
+                                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                                    requestQueue.add(request);
 
                                 }
-                            }) {
-                                @Override
-                                protected Map<String, String> getParams() throws AuthFailureError {
-                                    Map<String, String> params = new HashMap<>();
-
-                                    params.put("user_id", uid);
-                                    params.put("post_id", pid);
-                                    if (!viewHolderClass.commenttext.getText().toString().equals("")) {
-                                        params.put("comment", viewHolderClass.commenttext.getText().toString());
-                                    }
-                                    return params;
-                                }
-                            };
-                            request.setRetryPolicy(new DefaultRetryPolicy(
-                                    30000,
-                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                            requestQueue.add(request);
+                            }).start();
                         }
                     }
                 });
@@ -931,7 +1108,6 @@ public class Feed extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        FullScreenDialogFragment dialogFragment;
                         /*Intent in = new Intent(context, ViewComments.class);
                         try {
                             JSONObject o = jsonArray.getJSONObject(i);
@@ -944,19 +1120,13 @@ public class Feed extends Fragment {
                         in.putExtra("postid", pid);
                         context.startActivity(in);
                         getActivity().overridePendingTransition(R.anim.slidein, R.anim.slideout);*/
-
-                        Bundle bundle = new Bundle();
-                        new FullScreenDialogFragment.Builder(getActivity())
-                                .setTitle("Comments")
-                                .setContent(CommentFrag.class, bundle)
-                                .build();
-
-                        dialogFragment = new FullScreenDialogFragment.Builder(getActivity())
-                                .setTitle("hi")
-                                .build();
-
-                        dialogFragment.show(getFragmentManager(), "dialog");
-
+                        try {
+                            JSONObject o = jsonArray.getJSONObject(i);
+                            pid = o.getString("uid");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Comments.display(getActivity().getSupportFragmentManager(),pid,uid);
                     }
                 });
 
@@ -972,117 +1142,125 @@ public class Feed extends Fragment {
                         }
                         if (buttonState) {
 
-
-
                             viewHolderClass.like.setClickable(false);
                             viewHolderClass.like.setEnabled(false);
 
+                            new Thread(new Runnable() {
+                                public void run() {
 
-                            StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    JSONObject jsonObject1 = null;
-                                    try {
-                                        jsonObject1 = new JSONObject(response);
-                                        String likes = jsonObject1.getString("likes");
-                                        if ((Integer.parseInt(likes) > 1)) {
-                                            viewHolderClass.likes.setText(likes + " likes");
-                                            viewHolderClass.like.setClickable(true);
-                                            viewHolderClass.like.setEnabled(true);
+                                    StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            JSONObject jsonObject1 = null;
+                                            try {
+                                                jsonObject1 = new JSONObject(response);
+                                                String likes = jsonObject1.getString("likes");
+                                                if ((Integer.parseInt(likes) > 1)) {
+                                                    viewHolderClass.likes.setText(likes + " likes");
+                                                    viewHolderClass.like.setClickable(true);
+                                                    viewHolderClass.like.setEnabled(true);
 
-                                        } else {
-                                            viewHolderClass.likes.setText(likes + " like");
-                                            viewHolderClass.like.setClickable(true);
-                                            viewHolderClass.like.setEnabled(true);
+                                                } else {
+                                                    viewHolderClass.likes.setText(likes + " like");
+                                                    viewHolderClass.like.setClickable(true);
+                                                    viewHolderClass.like.setEnabled(true);
+
+                                                }
+
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+
 
                                         }
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-
-
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-
-                                }
-                            }) {
-                                @Override
-                                protected Map<String, String> getParams() throws AuthFailureError {
-
-                                    Map<String, String> params = new HashMap<>();
-                                    params.put("success", "0");
-                                    params.put("user_id", uid);
-                                    params.put("post_id", pid);
-
-                                    return params;
-                                }
-
-                            };
-                            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                                    30000,
-                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                            requestQueue.add(stringRequest);
-
-                        } else {
-                            YoYo.with(Techniques.Landing)
-                                    .duration(700)
-                                    .playOn(viewHolderClass.like);
-
-                            viewHolderClass.like.setClickable(false);
-                            viewHolderClass.like.setEnabled(false);
-
-                            StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    JSONObject jsonObject1 = null;
-                                    try {
-                                        jsonObject1 = new JSONObject(response);
-                                        String likes = jsonObject1.getString("likes");
-                                        if ((Integer.parseInt(likes) > 1)) {
-                                            viewHolderClass.likes.setText(likes + " likes");
-                                            viewHolderClass.like.setClickable(true);
-                                            viewHolderClass.like.setEnabled(true);
-
-                                        } else {
-                                            viewHolderClass.likes.setText(likes + " like");
-                                            viewHolderClass.like.setClickable(true);
-                                            viewHolderClass.like.setEnabled(true);
+                                    }, new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
 
                                         }
+                                    }) {
+                                        @Override
+                                        protected Map<String, String> getParams() throws AuthFailureError {
 
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
+                                            Map<String, String> params = new HashMap<>();
+                                            params.put("success", "0");
+                                            params.put("user_id", uid);
+                                            params.put("post_id", pid);
 
+                                            return params;
+                                        }
 
+                                    };
+                                    stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                            30000,
+                                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                                    requestQueue.add(stringRequest);
                                 }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
+                                }).start();
 
+                                } else {
+                                    YoYo.with(Techniques.Landing)
+                                            .duration(700)
+                                            .playOn(viewHolderClass.like);
+
+                                    viewHolderClass.like.setClickable(false);
+                                    viewHolderClass.like.setEnabled(false);
+
+                            new Thread(new Runnable() {
+                                public void run() {
+                                    StringRequest stringRequest = new StringRequest(Request.Method.POST, LIKE_URL, new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            JSONObject jsonObject1 = null;
+                                            try {
+                                                jsonObject1 = new JSONObject(response);
+                                                String likes = jsonObject1.getString("likes");
+                                                if ((Integer.parseInt(likes) > 1)) {
+                                                    viewHolderClass.likes.setText(likes + " likes");
+                                                    viewHolderClass.like.setClickable(true);
+                                                    viewHolderClass.like.setEnabled(true);
+
+                                                } else {
+                                                    viewHolderClass.likes.setText(likes + " like");
+                                                    viewHolderClass.like.setClickable(true);
+                                                    viewHolderClass.like.setEnabled(true);
+
+                                                }
+
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+
+
+                                        }
+                                    }, new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+
+                                        }
+                                    }) {
+                                        @Override
+                                        protected Map<String, String> getParams() throws AuthFailureError {
+
+                                            Map<String, String> params = new HashMap<>();
+                                            params.put("success", "1");
+                                            params.put("user_id", uid);
+                                            params.put("post_id", pid);
+
+                                            return params;
+                                        }
+
+                                    };
+                                    stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                            30000,
+                                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                                    requestQueue.add(stringRequest);
                                 }
-                            }) {
-                                @Override
-                                protected Map<String, String> getParams() throws AuthFailureError {
+                            }).start();
 
-                                    Map<String, String> params = new HashMap<>();
-                                    params.put("success", "1");
-                                    params.put("user_id", uid);
-                                    params.put("post_id", pid);
 
-                                    return params;
-                                }
-
-                            };
-                            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                                    30000,
-                                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                            requestQueue.add(stringRequest);
                         }
                     }
 
@@ -1149,6 +1327,5 @@ public class Feed extends Fragment {
         }
 
     }
-
 
 }

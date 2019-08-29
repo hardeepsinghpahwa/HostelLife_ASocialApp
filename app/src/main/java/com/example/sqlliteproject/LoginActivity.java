@@ -6,9 +6,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,7 +25,6 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -49,8 +48,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import dmax.dialog.SpotsDialog;
-
-import static com.example.sqlliteproject.Register.validate;
 
 public class LoginActivity extends AppCompatActivity{
 
@@ -85,6 +82,13 @@ public class LoginActivity extends AppCompatActivity{
         relativeLayout=findViewById(R.id.loginlayout);
         password=findViewById(R.id.loginpassword);
         register=findViewById(R.id.reg);
+
+        AnimationDrawable animationDrawable = (AnimationDrawable) relativeLayout.getBackground();
+
+        animationDrawable.setEnterFadeDuration(2500);
+        animationDrawable.setExitFadeDuration(5000);
+
+        animationDrawable.start();
 
         relativeLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override

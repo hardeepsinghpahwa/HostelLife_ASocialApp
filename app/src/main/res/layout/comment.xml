@@ -8,9 +8,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#e0e0e0"
         android:layout_gravity="center"
         android:gravity="center"
+        android:background="#f3f3f3"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
@@ -19,16 +19,20 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/commentpic"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="top"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/whitecircle" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
+            android:paddingLeft="10dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginTop="10dp"
             android:orientation="vertical">
 
@@ -36,7 +40,6 @@
                 android:id="@+id/usernamecomment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="hardeepsinghpahwa"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -49,7 +52,16 @@
 
         </LinearLayout>
 
+        <RelativeLayout
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary"
+            >
+
+        </RelativeLayout>
 
     </LinearLayout>
+
+
 
 </RelativeLayout>

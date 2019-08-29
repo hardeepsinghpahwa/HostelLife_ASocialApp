@@ -5,15 +5,11 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,7 +20,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -55,13 +50,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -472,6 +463,20 @@ public class EditProfile extends AppCompatActivity {
                                 Log.i("update", "success");
                                 alertDialog.dismiss();
                                 Toast.makeText(EditProfile.this, "Changes Saved", Toast.LENGTH_SHORT).show();
+
+                                final Intent data = new Intent();
+
+                                // Add the required data to be returned to the MainActivity
+                                data.putExtra("ok",1);
+
+                                // Set the resultCode to Activity.RESULT_OK to
+                                // indicate a success and attach the Intent
+                                // which contains our result data
+                                setResult(Activity.RESULT_OK, data);
+
+                                // With finish() we close the AnotherActivity to
+                                // return to MainActivity
+
                                 finish();
                             }
 

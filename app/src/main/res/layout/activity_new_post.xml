@@ -1,75 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#00000000"
     tools:context=".NewPost">
 
-    <LinearLayout
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Post"
+        android:textColor="#FFFFFF"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:textSize="25sp"
+        />
+
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:orientation="vertical">
+        android:layout_margin="10dp"
+        app:cardElevation="10dp"
+        app:cardCornerRadius="10dp"
+        >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:id="@+id/newpostlayout"
-        android:layout_height="700dp"
-        android:background="@drawable/phoneback"
-        android:orientation="vertical">
-
-
-        <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_gravity="center"
-            android:id="@+id/img"
-            android:src="@drawable/gallery"
-            android:layout_marginTop="15dp"
-            />
-
-        <EditText
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:padding="10dp"
-            android:hint="Write a Post"
-            android:gravity="top"
-            android:background="@drawable/edittextback"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="10dp"
-            android:id="@+id/postt"
-            android:layout_marginTop="60dp"
-            />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/edittextback"
-            android:layout_margin="20dp"
-            android:padding="10dp"
-            android:hint="Add  Location"
-            android:gravity="center_vertical"
-            android:id="@+id/location"
-            />
-
-        <Button
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/poststext"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/button"
-            android:text="Post"
-            android:id="@+id/post"
-            android:layout_gravity="center"
-            android:layout_marginBottom="20dp"
-            />
+            android:id="@+id/newpostlayout"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradient5"
+            android:orientation="vertical">
 
 
-    </LinearLayout>
-    </LinearLayout>
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:id="@+id/img"
+                android:src="@drawable/newimage"
+                android:layout_marginTop="15dp"
+                />
 
-</ScrollView>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:padding="15dp"
+                android:hint="Write a Post"
+                android:gravity="top"
+                android:background="@drawable/postedittext"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/postt"
+                android:layout_marginTop="20dp"
+                />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/commentedittext"
+                android:layout_margin="20dp"
+                android:padding="10dp"
+                android:hint="Add  Location"
+                android:gravity="center_vertical"
+                android:id="@+id/location"
+                />
+
+            <Button
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/poststext"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:background="@color/colorPrimary"
+                android:text="Post"
+                android:textColor="#FFFFFF"
+                android:id="@+id/post"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="60dp"
+                />
+
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

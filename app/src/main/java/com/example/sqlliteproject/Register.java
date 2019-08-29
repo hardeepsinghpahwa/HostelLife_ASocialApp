@@ -1,28 +1,29 @@
 package com.example.sqlliteproject;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -35,7 +36,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -66,7 +66,7 @@ import dmax.dialog.SpotsDialog;
 
 public class Register extends AppCompatActivity {
 
-    private TextInputEditText name, pass, reenterpass, email, username;
+    private EditText name, pass, reenterpass, email, username;
     private Button register;
     private ProgressBar progressBar;
     private ProgressDialog reg;
@@ -75,6 +75,7 @@ public class Register extends AppCompatActivity {
     String downloadlink;
     Uri uri, resultUri;
     String gen;
+    RelativeLayout relativeLayout;
     AlertDialog alertDialog;
     DatePickerDialog.OnDateSetListener pDateSetListener;
     StorageReference storageReference;
@@ -108,8 +109,28 @@ public class Register extends AppCompatActivity {
         username = findViewById(R.id.username);
         profilepic = findViewById(R.id.profilepic);
         pPickDate = findViewById(R.id.selectdate);
+        relativeLayout=findViewById(R.id.reglayout);
         gender=findViewById(R.id.gender);
         storageReference = FirebaseStorage.getInstance().getReference();
+
+
+
+        relativeLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+
+            }
+        });
+
+        AnimationDrawable animationDrawable = (AnimationDrawable) relativeLayout.getBackground();
+
+        animationDrawable.setEnterFadeDuration(2500);
+        animationDrawable.setExitFadeDuration(5000);
+
+        animationDrawable.start();
 
         pPickDate.setText("");
         pPickDate.setOnClickListener(new View.OnClickListener() {

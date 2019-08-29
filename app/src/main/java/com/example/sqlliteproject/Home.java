@@ -3,20 +3,15 @@ package com.example.sqlliteproject;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.SparseArray;
 import android.view.MenuItem;
 import android.widget.Toast;
-
-import org.json.JSONArray;
-
-import java.util.HashMap;
 
 public class Home extends AppCompatActivity implements Feed.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener{
 
@@ -41,6 +36,8 @@ public class Home extends AppCompatActivity implements Feed.OnFragmentInteractio
         }
 
         bottomNavigationView=findViewById(R.id.bottomnavbar);
+
+
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

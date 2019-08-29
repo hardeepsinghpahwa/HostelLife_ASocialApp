@@ -16,9 +16,9 @@
     <string name="add_profile_picture">Add Profile Picture</string>
     <string name="_0_likes">0 likes</string>
     <string name="_0_comments">0 comments</string>
-    <string name="male">MALE</string>
-    <string name="female">FEMALE</string>
-    <string name="other">OTHER</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="other">Other</string>
     <string name="your_posts">YOUR POSTS</string>
     <string name="post">Post</string>
     <string name="write_a_comment">Write a comment</string>

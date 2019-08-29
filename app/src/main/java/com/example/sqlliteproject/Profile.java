@@ -1,32 +1,31 @@
 package com.example.sqlliteproject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.appbar.AppBarLayout;
+
+import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,8 +39,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.facebook.shimmer.ShimmerFrameLayout;
-import com.github.siyamed.shapeimageview.HexagonImageView;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.squareup.picasso.Picasso;
 
@@ -49,7 +46,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,7 +54,6 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
-import jp.wasabeef.blurry.Blurry;
 
 public class Profile extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -76,8 +71,9 @@ public class Profile extends Fragment {
     LinearLayout me,about,info;
     AlertDialog alertDialog;
     String uid, json;
+    NestedScrollView nestedScrollView;
     TextView logout,followers,following,postsno;
-    SpinKitView progressBar;
+    SpinKitView progressBar,recpbar;
     AppBarLayout appBar;
     SharedPreferences shared;
     RecyclerView posts;
@@ -145,6 +141,7 @@ public class Profile extends Fragment {
         logout = v.findViewById(R.id.logout);
         progressBar = v.findViewById(R.id.profileprogressbar);
         appBar=v.findViewById(R.id.app_bar);
+        recpbar=v.findViewById(R.id.spin_kit);
         toolbar=v.findViewById(R.id.toolbarprofile);
         l1=v.findViewById(R.id.l1);
         followers=v.findViewById(R.id.followers);
@@ -155,6 +152,23 @@ public class Profile extends Fragment {
         about=v.findViewById(R.id.about);
         info=v.findViewById(R.id.info);
         back=v.findViewById(R.id.back);
+        nestedScrollView=v.findViewById(R.id.profilenestedscroll);
+
+        loaddata();
+
+        AnimationDrawable animationDrawable = (AnimationDrawable) back.getBackground();
+        animationDrawable.setEnterFadeDuration(2500);
+        animationDrawable.setExitFadeDuration(5000);
+        animationDrawable.start();
+
+        nestedScrollView.setSmoothScrollingEnabled(true);
+        nestedScrollView.smoothScrollTo(4,4);
+
+        final LayoutAnimationController controller =
+                AnimationUtils.loadLayoutAnimation(getActivity(), R.anim.gridanim);
+
+        posts.setLayoutAnimation(controller);
+        posts.scheduleLayoutAnimation();
 
         appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             boolean isShow = false;
@@ -381,12 +395,32 @@ public class Profile extends Fragment {
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), EditProfile.class);
                 i.putExtra("uid", uid);
-                startActivity(i);
+                startActivityForResult(i,12);
                 getActivity().overridePendingTransition(R.anim.fadein,R.anim.fadeout);
             }
         });
 
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==12)
+        {
+            if (resultCode == Activity.RESULT_OK) {
+
+                // Get the result from the returned Intent
+                int ok = data.getIntExtra("ok",0);
+
+                if(ok==1)
+                {
+                    loaddata();
+                }
+
+            }
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -407,9 +441,7 @@ public class Profile extends Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    private void loaddata(){
         if (getActivity().getIntent().getStringExtra("json") == null) {
             SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
 
@@ -429,138 +461,148 @@ public class Profile extends Fragment {
             e.printStackTrace();
         }
 
-
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+        new Thread(new Runnable() {
             @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject jsonObject1 = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject1.getJSONArray("details");
-                    JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+            public void run() {
+                final StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.i("res", response);
 
-                    back.setVisibility(View.VISIBLE);
-                    name.setText(jsonObject2.getString("name"));
-                    username.setText(jsonObject2.getString("username"));
-                    username2.setText("@"+jsonObject2.getString("username"));
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject.getJSONArray("posts");
 
-                    if (jsonObject2.getString("email").equals("")) {
-                        email.setVisibility(View.GONE);
+                            if (jsonArray.length() == 0) {
+                                progressBar.setVisibility(View.GONE);
+                                noposts.setVisibility(View.VISIBLE);
+                            }
+
+                            posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.i("success", e.toString());
+                        }
+
                     }
-                    email.setText(jsonObject2.getString("email"));
-                    if (jsonObject2.getString("phone").equals("0")) {
-                        phn.setVisibility(View.GONE);
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("success", error.toString());
+
                     }
-                    Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
-                    SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
-                    String d = format.format(date1);
-                    birthday.setText(d);
-                    Picasso.get().load(jsonObject2.getString("image")).into(propic);
-                    propic.setVisibility(View.VISIBLE);
-
-                    YoYo.with(Techniques.FlipInX)
-                            .duration(700)
-                            .playOn(propic);
-                    if (jsonObject2.getString("description").equals("")) {
-                        desc.setHint("Edit to add a description");
-                        desc.setTextSize(15);
-                    }
-                    desc.setText(jsonObject2.getString("description"));
-                    me.setVisibility(View.VISIBLE);
-
-                    YoYo.with(Techniques.FadeInUp)
-                            .duration(700)
-                            .playOn(about);
-                    YoYo.with(Techniques.FadeInUp)
-                            .duration(700)
-                            .playOn(info);
-                    back.setFocusable(false);
-                    about.setVisibility(View.VISIBLE);
-                    info.setVisibility(View.VISIBLE);
-                    edit.setVisibility(View.VISIBLE);
-                    edit.setFocusable(true);
-                    edit.bringToFront();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
                 }
+                ) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+
+                        Map<String, String> params = new HashMap<>();
+                        params.put("userid", uid);
+
+                        return params;
+                    }
+                };
+                stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                        30000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        recpbar.setVisibility(View.VISIBLE);
+                        try {
+                            JSONObject jsonObject1 = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject1.getJSONArray("details");
+                            JSONObject jsonObject2 = jsonArray.getJSONObject(0);
+                            requestQueue.add(stringRequest1);
+
+                            back.setVisibility(View.VISIBLE);
+                            name.setText(jsonObject2.getString("name"));
+                            username.setText(jsonObject2.getString("username"));
+                            username2.setText("@"+jsonObject2.getString("username"));
+
+                            if (jsonObject2.getString("email").equals("")) {
+                                email.setVisibility(View.GONE);
+                            }
+                            email.setText(jsonObject2.getString("email"));
+                            if (jsonObject2.getString("phone").equals("0")) {
+                                phn.setVisibility(View.GONE);
+                            }
+                            Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
+                            SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+                            String d = format.format(date1);
+                            birthday.setText(d);
+                            Picasso.get().load(jsonObject2.getString("image")).into(propic);
+                            propic.setVisibility(View.VISIBLE);
+
+
+                            YoYo.with(Techniques.FlipInX)
+                                    .duration(700)
+                                    .playOn(propic);
+                            if (jsonObject2.getString("description").equals("")) {
+                                desc.setHint("Edit to add a description");
+                                desc.setTextSize(15);
+                            }
+                            desc.setText(jsonObject2.getString("description"));
+                            me.setVisibility(View.VISIBLE);
+
+                            YoYo.with(Techniques.FadeInUp)
+                                    .duration(700)
+                                    .playOn(about);
+                            YoYo.with(Techniques.FadeInUp)
+                                    .duration(700)
+                                    .playOn(info);
+                            back.setFocusable(false);
+                            about.setVisibility(View.VISIBLE);
+                            info.setVisibility(View.VISIBLE);
+                            edit.setVisibility(View.VISIBLE);
+                            edit.setFocusable(true);
+                            edit.bringToFront();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+
+                        Map<String, String> params = new HashMap<>();
+                        params.put("userid", uid);
+
+                        return params;
+                    }
+                };
+                stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                        30000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+                requestQueue = Volley.newRequestQueue(getActivity());
+                requestQueue.add(stringRequest);
 
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-
-                Map<String, String> params = new HashMap<>();
-                params.put("userid", uid);
-
-                return params;
-            }
-        };
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-        requestQueue = Volley.newRequestQueue(getActivity());
-        requestQueue.add(stringRequest);
-
+        }).start();
 
         posts.setLayoutManager(new GridLayoutManager(getActivity(),3));
 
+    }
 
-        StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    Log.i("res", response);
+    @Override
+    public void onResume() {
+        super.onResume();
 
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject.getJSONArray("posts");
-
-                    if (jsonArray.length() == 0) {
-                        progressBar.setVisibility(View.GONE);
-                        noposts.setVisibility(View.VISIBLE);
-                    }
-
-                    posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.i("success", e.toString());
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("success", error.toString());
-
-            }
-        }
-        ) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-
-                Map<String, String> params = new HashMap<>();
-                params.put("userid", uid);
-
-                return params;
-            }
-        };
-        stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
-                30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-        requestQueue.add(stringRequest1);
     }
 
     @Override
@@ -600,7 +642,7 @@ public class Profile extends Fragment {
         @Override
         public void onViewAttachedToWindow(@NonNull PostViewHolder1 holder) {
             super.onViewAttachedToWindow(holder);
-            progressBar.setVisibility(View.GONE);
+            recpbar.setVisibility(View.GONE);
         }
 
         @NonNull
@@ -616,7 +658,7 @@ public class Profile extends Fragment {
 
             try {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                Picasso.get().load(jsonObject.getString("image")).into(postViewHolder.postimage);
+                Picasso.get().load(jsonObject.getString("image")).placeholder(R.drawable.greyround).into(postViewHolder.postimage);
                 postid = jsonObject.getString("uid");
             } catch (JSONException e) {
                 e.printStackTrace();

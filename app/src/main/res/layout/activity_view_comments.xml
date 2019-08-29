@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,73 +10,5 @@
     android:background="@color/colorPrimary"
     tools:context=".ViewComments">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="100dp"
-            android:id="@+id/commentspbar"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_comments"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:textSize="20sp"
-            android:visibility="gone"
-            android:id="@+id/nocomments"
-            android:textStyle="bold"
-            />
-
-    <android.support.v7.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="5dp"
-        android:id="@+id/commentsrecyclerview"
-        android:layout_marginBottom="60dp"
-        >
-    </android.support.v7.widget.RecyclerView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_alignParentBottom="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:orientation="horizontal"
-        android:weightSum="5">
-
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:layout_margin="5dp"
-            android:layout_weight="3.7"
-            android:background="@drawable/commentedittext"
-            android:gravity="center_vertical"
-            android:hint="@string/write_a_comment"
-            android:padding="10dp"
-            android:id="@+id/commenttext1"
-            android:singleLine="true" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:layout_margin="5dp"
-            android:layout_weight="1.3"
-            android:id="@+id/postcomment1"
-            android:background="@drawable/button"
-            android:text="@string/post" />
-
-    </LinearLayout>
-    </RelativeLayout>
-
-</android.support.v7.widget.CardView>
+</androidx.cardview.widget.CardView>
