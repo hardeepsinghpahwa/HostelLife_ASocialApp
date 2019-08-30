@@ -81,7 +81,7 @@
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/addwhite" />
+                        android:src="@drawable/ad" />
 
                 </RelativeLayout>
 

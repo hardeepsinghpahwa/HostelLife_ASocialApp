@@ -87,6 +87,7 @@ import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
+import maes.tech.intentanim.CustomIntent;
 
 public class Feed extends Fragment {
 
@@ -275,7 +276,7 @@ public class Feed extends Fragment {
 
 
 
-        getActivity().runOnUiThread(new Runnable() {
+        new Thread(new Runnable() {
             public void run() {
                 // a potentially time consuming task
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, SHOW_URL, new Response.Listener<String>() {
@@ -312,7 +313,7 @@ public class Feed extends Fragment {
                 requestQueue.add(stringRequest);
 
             }
-        });
+        }).start();
     }
 
     private void createCameraSource() {
@@ -434,7 +435,7 @@ public class Feed extends Fragment {
 
                 Intent i = new Intent(getActivity(), NewPost.class);
                 startActivityForResult(i,123);
-
+                getActivity().overridePendingTransition(R.anim.slideup,R.anim.slidedown);
 
             }
         });
@@ -1015,6 +1016,7 @@ public class Feed extends Fragment {
                             e.printStackTrace();
                         }
                         startActivity(intent);
+                        CustomIntent.customType(getActivity(),"left-to-right");
                     }
                 });
 

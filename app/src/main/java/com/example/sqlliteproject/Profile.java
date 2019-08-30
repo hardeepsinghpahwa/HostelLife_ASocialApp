@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.NonNull;
+
+import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.AppBarLayout;
 
 import androidx.core.widget.NestedScrollView;
@@ -40,7 +42,6 @@ import com.android.volley.toolbox.Volley;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.github.ybq.android.spinkit.SpinKitView;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +55,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
+import maes.tech.intentanim.CustomIntent;
 
 public class Profile extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -164,12 +166,6 @@ public class Profile extends Fragment {
         nestedScrollView.setSmoothScrollingEnabled(true);
         nestedScrollView.smoothScrollTo(4,4);
 
-        final LayoutAnimationController controller =
-                AnimationUtils.loadLayoutAnimation(getActivity(), R.anim.gridanim);
-
-        posts.setLayoutAnimation(controller);
-        posts.scheduleLayoutAnimation();
-
         appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             boolean isShow = false;
             int scrollRange = -1;
@@ -244,152 +240,7 @@ public class Profile extends Fragment {
             }
         });
 
-        /* if (getActivity().getIntent().getStringExtra("json") == null) {
-             SharedPreferences shared = getActivity().getSharedPreferences("Mypref", Context.MODE_PRIVATE);
 
-             json = shared.getString("json", "");
-
-         } else {
-             json = getActivity().getIntent().getStringExtra("json");
-         }
-
-
-         JSONObject jsonObject = new JSONObject(json);
-
-         uid = jsonObject.getString("uid");
-
-
-         StringRequest stringRequest = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
-             @Override
-             public void onResponse(String response) {
-                 try {
-                     JSONObject jsonObject1 = new JSONObject(response);
-                     JSONArray jsonArray = jsonObject1.getJSONArray("details");
-                     JSONObject jsonObject2 = jsonArray.getJSONObject(0);
-
-                     back.setVisibility(View.VISIBLE);
-                     name.setText(jsonObject2.getString("name"));
-                     username.setText(jsonObject2.getString("username"));
-                     username2.setText("@"+jsonObject2.getString("username"));
-
-                     if (jsonObject2.getString("email").equals("")) {
-                         email.setVisibility(View.GONE);
-                     }
-                     email.setText(jsonObject2.getString("email"));
-                     if (jsonObject2.getString("phone").equals("0")) {
-                         phn.setVisibility(View.GONE);
-                     }
-                     Date date1 = new SimpleDateFormat("MM/dd/yyyy").parse(jsonObject2.getString("birthday"));
-                     SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
-                     String d = format.format(date1);
-                     birthday.setText(d);
-                     Picasso.get().load(jsonObject2.getString("image")).into(propic);
-                     propic.setVisibility(View.VISIBLE);
-
-                     YoYo.with(Techniques.FlipInX)
-                             .duration(700)
-                             .playOn(propic);
-                     if (jsonObject2.getString("description").equals("")) {
-                         desc.setHint("Edit to add a description");
-                         desc.setTextSize(15);
-                     }
-                     desc.setText(jsonObject2.getString("description"));
-                     me.setVisibility(View.VISIBLE);
-
-                     YoYo.with(Techniques.FadeInUp)
-                             .duration(700)
-                             .playOn(about);
-                     YoYo.with(Techniques.FadeInUp)
-                             .duration(700)
-                             .playOn(info);
-                     back.setFocusable(false);
-                     about.setVisibility(View.VISIBLE);
-                     info.setVisibility(View.VISIBLE);
-                     edit.setVisibility(View.VISIBLE);
-                     edit.setFocusable(true);
-                     edit.bringToFront();
-
-                 } catch (JSONException e) {
-                     e.printStackTrace();
-                 } catch (ParseException e) {
-                     e.printStackTrace();
-                 }
-
-             }
-         }, new Response.ErrorListener() {
-             @Override
-             public void onErrorResponse(VolleyError error) {
-
-             }
-         }) {
-             @Override
-             protected Map<String, String> getParams() throws AuthFailureError {
-
-                 Map<String, String> params = new HashMap<>();
-                 params.put("userid", uid);
-
-                 return params;
-             }
-         };
-         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                 30000,
-                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-         requestQueue = Volley.newRequestQueue(getActivity());
-         requestQueue.add(stringRequest);
-
-
-         posts.setLayoutManager(new GridLayoutManager(getActivity(),3));
-
-
-         StringRequest stringRequest1 = new StringRequest(Request.Method.POST, GETPOSTSURL, new Response.Listener<String>() {
-             @Override
-             public void onResponse(String response) {
-                 try {
-                     Log.i("res", response);
-
-                     JSONObject jsonObject = new JSONObject(response);
-                     JSONArray jsonArray = jsonObject.getJSONArray("posts");
-
-                     if (jsonArray.length() == 0) {
-                         progressBar.setVisibility(View.GONE);
-                         noposts.setVisibility(View.VISIBLE);
-                     }
-
-                     posts.setAdapter(new PostAdapter1(jsonArray, uid, getActivity()));
-
-
-                 } catch (JSONException e) {
-                     e.printStackTrace();
-                     Log.i("success", e.toString());
-                 }
-
-             }
-         }, new Response.ErrorListener() {
-             @Override
-             public void onErrorResponse(VolleyError error) {
-                 Log.i("success", error.toString());
-
-             }
-         }
-         ) {
-             @Override
-             protected Map<String, String> getParams() throws AuthFailureError {
-
-                 Map<String, String> params = new HashMap<>();
-                 params.put("userid", uid);
-
-                 return params;
-             }
-         };
-         stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
-                 30000,
-                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-         requestQueue.add(stringRequest1);
-*/
         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -535,7 +386,8 @@ public class Profile extends Fragment {
                             SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
                             String d = format.format(date1);
                             birthday.setText(d);
-                            Picasso.get().load(jsonObject2.getString("image")).into(propic);
+                            Glide.with(getActivity()).load(jsonObject2.getString("image")).into(propic);
+
                             propic.setVisibility(View.VISIBLE);
 
 
@@ -658,7 +510,8 @@ public class Profile extends Fragment {
 
             try {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                Picasso.get().load(jsonObject.getString("image")).placeholder(R.drawable.greyround).into(postViewHolder.postimage);
+                //Picasso.get().load(jsonObject.getString("image")).placeholder(R.drawable.greyround).into(postViewHolder.postimage);
+                Glide.with(getActivity()).load(jsonObject.getString("image")).placeholder(R.drawable.greyround).into(postViewHolder.postimage);
                 postid = jsonObject.getString("uid");
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -675,6 +528,8 @@ public class Profile extends Fragment {
                         intent.putExtra("loginuser", uid);
                         intent.putExtra("postid", object.getString("uid"));
                         startActivity(intent);
+                        CustomIntent.customType(getActivity(),"left-to-right");
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

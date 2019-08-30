@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import dmax.dialog.SpotsDialog;
+import maes.tech.intentanim.CustomIntent;
 
 public class NewPost extends AppCompatActivity {
 
@@ -93,6 +94,7 @@ public class NewPost extends AppCompatActivity {
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+
             }
         });
 
@@ -112,8 +114,8 @@ public class NewPost extends AppCompatActivity {
                     // indicate a success and attach the Intent
                     // which contains our result data
                     setResult(Activity.RESULT_OK, data);
-
                     finish();
+                    CustomIntent.customType(NewPost.this,"up-to-bottom");
                 }
                 else {
                     Toast.makeText(NewPost.this, "Image and post cant be empty", Toast.LENGTH_SHORT).show();
@@ -146,11 +148,13 @@ public class NewPost extends AppCompatActivity {
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
+
         return true;
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        CustomIntent.customType(NewPost.this,"up-to-bottom");
     }
 }

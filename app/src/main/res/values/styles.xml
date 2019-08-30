@@ -42,7 +42,7 @@
 
     <style name="Custom" parent="android:Theme.DeviceDefault.Dialog">
         <item name="DialogTitleAppearance">@android:style/TextAppearance.Medium</item>
-        <item name="android:fontFamily">serif</item>
+        <item name="android:fontFamily">@font/fredoka_one</item>
         <item name="DialogSpotColor">#FFFFFF</item>
         <item name="android:background">@drawable/gradient1</item>
         <item name="DialogSpotCount">6</item>

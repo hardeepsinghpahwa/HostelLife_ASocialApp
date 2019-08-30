@@ -22,7 +22,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.varunest.sparkbutton.SparkButton;
 import com.varunest.sparkbutton.SparkEventListener;
 
@@ -37,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import maes.tech.intentanim.CustomIntent;
 
 public class ViewPost extends AppCompatActivity {
 
@@ -52,10 +56,11 @@ public class ViewPost extends AppCompatActivity {
     TextView username, time, description, location, likes, comments;
     ImageView postpic;
     EditText commenttext;
-    CircleImageView propic;
-    Button postcomment;
+    CircleImageView propic,pro;
+    ImageView postcomment;
     ImageButton comment;
     SparkButton like;
+    SpinKitView spinKitView;
     String loginuser;
     String time1, img, desc, loc, likes1, userid1, comments1;
 
@@ -72,8 +77,6 @@ public class ViewPost extends AppCompatActivity {
         if (!serviceManager.isNetworkAvailable()) {
             startActivity(new Intent(ViewPost.this, NoInternet.class));
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Log.i("loginuser", loginuser);
 
@@ -87,9 +90,13 @@ public class ViewPost extends AppCompatActivity {
         comment = findViewById(R.id.comment1);
         commenttext = findViewById(R.id.commenttext1);
         likes = findViewById(R.id.likesno1);
+        pro=findViewById(R.id.propic21);
+        spinKitView=findViewById(R.id.commentspin1);
         comments = findViewById(R.id.commentsno1);
         postcomment = findViewById(R.id.postcomment1);
 
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, GETPOST_URL, new Response.Listener<String>() {
             @Override
@@ -107,6 +114,7 @@ public class ViewPost extends AppCompatActivity {
                     comments1 = jsonObject2.getString("comments");
                     userid1 = jsonObject2.getString("userid");
 
+
                     StringRequest stringRequest2 = new StringRequest(Request.Method.POST, PROFILE_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -116,9 +124,10 @@ public class ViewPost extends AppCompatActivity {
                                 JSONObject jsonObject2 = jsonArray.getJSONObject(0);
 
                                 username.setText(jsonObject2.getString("username"));
-                                getSupportActionBar().setTitle(jsonObject2.getString("username"));
-                                Picasso.get().load(jsonObject2.getString("image")).into(propic);
+                                Glide.with(ViewPost.this).load(jsonObject2.getString("image")).into(propic);
+                                Glide.with(ViewPost.this).load(jsonObject2.getString("image")).into(pro);
 
+                                getSupportActionBar().setTitle((jsonObject2.getString("username"))+"'s Post");
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -207,7 +216,7 @@ public class ViewPost extends AppCompatActivity {
                             comments.setText(comments1 + " comment");
                         }
 
-                        Picasso.get().load(img).into(postpic);
+                        Glide.with(getApplicationContext()).load(img).into(postpic);
 
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -239,6 +248,20 @@ public class ViewPost extends AppCompatActivity {
         requestQueue.add(stringRequest);
 
 
+        username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(ViewPost.this, ProfileDetails.class);
+                    intent.putExtra("loginuser", loginuser);
+                    intent.putExtra("userid", userid1);
+
+                startActivity(intent);
+                CustomIntent.customType(ViewPost.this,"left-to-right");
+            }
+        });
+
+
         StringRequest stringRequest1 = new StringRequest(Request.Method.POST, CHECK_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -252,6 +275,10 @@ public class ViewPost extends AppCompatActivity {
                         like.setChecked(true);
                     }
 
+                    like.setVisibility(View.VISIBLE);
+                    comment.setVisibility(View.VISIBLE);
+                    commenttext.setVisibility(View.VISIBLE);
+                    postcomment.setVisibility(View.VISIBLE);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -286,8 +313,16 @@ public class ViewPost extends AppCompatActivity {
         postcomment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                postcomment.setText("Posting...");
 
+                if (commenttext.getText().toString().equals("")) {
+
+                    Toast toast = Toast.makeText(getApplicationContext(), "Empty Comment", Toast.LENGTH_SHORT);
+                    toast.show();
+                    commenttext.clearFocus();
+
+                } else {
+                    postcomment.setVisibility(View.INVISIBLE);
+                    spinKitView.setVisibility(View.VISIBLE);
 
                 StringRequest request = new StringRequest(Request.Method.POST, COMMENT_URL, new Response.Listener<String>() {
                     @Override
@@ -305,7 +340,8 @@ public class ViewPost extends AppCompatActivity {
                                         InputMethodManager.HIDE_NOT_ALWAYS);
 
                                 Toast.makeText(ViewPost.this, "Comment Posted", Toast.LENGTH_SHORT).show();
-                                postcomment.setText("Post");
+                                postcomment.setVisibility(View.VISIBLE);
+                                spinKitView.setVisibility(View.INVISIBLE);
                             }
 
                             if ((Integer.parseInt(commentz) > 1)) {
@@ -336,8 +372,6 @@ public class ViewPost extends AppCompatActivity {
                         params.put("post_id", postid);
                         if (!commenttext.getText().toString().equals("")) {
                             params.put("comment", commenttext.getText().toString());
-                        } else {
-                            Toast.makeText(ViewPost.this, "Comment is empty", Toast.LENGTH_SHORT).show();
                         }
                         return params;
                     }
@@ -349,6 +383,7 @@ public class ViewPost extends AppCompatActivity {
 
                 requestQueue.add(request);
             }
+            }
         });
 
 
@@ -356,11 +391,7 @@ public class ViewPost extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Intent in = new Intent(ViewPost.this, ViewComments.class);
-
-                in.putExtra("userid", loginuser);
-                in.putExtra("postid", postid);
-                startActivity(in);
+                Comments.display(getSupportFragmentManager(),postid,loginuser);
 
             }
         });
@@ -425,6 +456,9 @@ public class ViewPost extends AppCompatActivity {
                 }
 
                 else {
+                    YoYo.with(Techniques.Landing)
+                            .duration(700)
+                            .playOn(like);
 
                     like.setEnabled(false);
                     like.setClickable(false);
@@ -491,62 +525,6 @@ public class ViewPost extends AppCompatActivity {
             }
         });
 
-        /*like.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                like.setClickable(false);
-
-                StringRequest stringRequest1 = new StringRequest(Request.Method.POST, CHECK_URL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        JSONObject jsonObject = null;
-                        try {
-                            jsonObject = new JSONObject(response);
-                            final String success = jsonObject.getString("success");
-
-                            if (success.equals("1")) {
-
-
-                            } else if (success.equals("0")) {
-
-
-                            }
-
-
-                            Log.i("su", success);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-
-                        Map<String, String> params = new HashMap<>();
-                        params.put("pid", postid);
-                        params.put("uid", loginuser);
-
-
-                        return params;
-                    }
-                };
-                stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
-                        30000,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-                requestQueue.add(stringRequest1);
-
-            }
-        });*/
-
-
         comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -565,6 +543,7 @@ public class ViewPost extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        CustomIntent.customType(ViewPost.this,"right-to-left");
     }
 
 }

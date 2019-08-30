@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#00000000"
+    android:background="#808080"
     tools:context=".NewPost">
 
 
@@ -35,14 +35,29 @@
             android:orientation="vertical">
 
 
-            <ImageView
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_gravity="center"
-                android:id="@+id/img"
-                android:src="@drawable/newimage"
-                android:layout_marginTop="15dp"
-                />
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:id="@+id/img"
+                    android:padding="4dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/addimage1"
+                    android:layout_marginTop="15dp"
+                    />
+
+                <ImageView
+                    android:src="@drawable/round"
+                    android:layout_marginTop="15dp"
+                    android:layout_gravity="center"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp" />
+            </RelativeLayout>
+
 
             <EditText
                 android:layout_width="match_parent"
@@ -55,6 +70,8 @@
                 android:layout_marginRight="20dp"
                 android:layout_marginBottom="10dp"
                 android:id="@+id/postt"
+                android:textColorHint="#FFFFFF"
+                android:textColor="#FFFFFF"
                 android:layout_marginTop="20dp"
                 />
 
@@ -63,6 +80,8 @@
                 android:layout_height="50dp"
                 android:background="@drawable/commentedittext"
                 android:layout_margin="20dp"
+                android:textColorHint="#FFFFFF"
+                android:textColor="#FFFFFF"
                 android:padding="10dp"
                 android:hint="Add  Location"
                 android:gravity="center_vertical"
@@ -71,7 +90,7 @@
 
             <Button
                 android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_below="@+id/poststext"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp"

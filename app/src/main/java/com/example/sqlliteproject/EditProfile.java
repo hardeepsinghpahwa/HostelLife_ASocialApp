@@ -35,6 +35,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -42,7 +43,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -193,7 +193,8 @@ public class EditProfile extends AppCompatActivity {
                    img=jsonObject2.getString("image");
 
                     bdate.setText(jsonObject2.getString("birthday"));
-                    Picasso.get().load(jsonObject2.getString("image")).into(profilepic);
+                    Glide.with(EditProfile.this).load(jsonObject2.getString("image")).into(profilepic);
+
                     description.setText(jsonObject2.getString("description"));
 
                     progressBar1.setVisibility(View.GONE);

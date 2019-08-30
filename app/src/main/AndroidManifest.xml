@@ -19,12 +19,14 @@
         android:roundIcon="@mipmap/logo1"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FaceTrackerActivity"
+        <activity android:name=".tempp"></activity>
+        <activity
+            android:name=".FaceTrackerActivity"
             android:label="Face Tracker"
-            android:theme="@style/Theme.AppCompat.NoActionBar"> </activity>
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".Splash"
-            android:theme="@style/NoBarAppTheme"></activity>
+            android:theme="@style/NoBarAppTheme" />
         <activity
             android:name=".NoInternet"
             android:theme="@style/NoBarAppTheme" />
@@ -44,8 +46,7 @@
             android:name=".Home"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/NoBarAppTheme">
-        </activity>
+            android:theme="@style/NoBarAppTheme" />
         <activity
             android:name=".LoginActivity"
             android:theme="@style/NoBarAppTheme">
@@ -62,14 +63,12 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
-
-        <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
-
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="face" />
-
     </application>
 
 </manifest>
